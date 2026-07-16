@@ -1,0 +1,25 @@
+services:
+  # Backend Node.js Server
+  - type: web
+    name: marketplace-backend
+    env: node
+    buildCommand: npm install express dotenv cors needle --no-audit --no-fund --legacy-peer-deps || echo "Proceeding with native Node modules"
+    startCommand: node server.js
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
+
+  # Frontend Next.js Server
+  - type: web
+    name: marketplace-frontend
+    env: node
+    buildCommand: corepack enable pnpm && pnpm install --no-frozen-lockfile && pnpm run build
+    startCommand: pnpm run start
+    envVars:
+      - key: NEXT_PUBLIC_BACKEND_URL
+        fromService:
+          type: web
+          name: marketplace-backend
+          property: host
