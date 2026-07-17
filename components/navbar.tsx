@@ -1,8 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Menu, X, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useAuth } from '@/components/auth-provider'
 
 const links = [
   { label: 'Instagram', href: '#categories' },
@@ -14,6 +17,14 @@ const links = [
 
 export function Navbar() {
   const [open, setOpen] = useState(false)
+  const { user, setUser } = useAuth()
+  const router = useRouter()
+
+  async function handleLogout() {
+    await fetch('/api/auth/logout', { method: 'POST' })
+    setUser(null)
+    router.push('/')
+  }
 
   return (
     <header className="fixed inset-x-0 top-0 z-50">
@@ -43,15 +54,31 @@ export function Navbar() {
 
           {/* Right actions */}
           <div className="hidden items-center gap-2 md:flex">
-            <Button
-              variant="ghost"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              Login
-            </Button>
-            <Button className="gradient-accent border-0 text-white shadow-lg shadow-primary/20 transition-transform hover:scale-[1.03]">
-              Sign Up
-            </Button>
+            {!user ? (
+              <>
+                <Link href="/login">
+                  <Button
+                    variant="ghost"
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    Login
+                  </Button>
+                </Link>
+                <Link href="/signup">
+                  <Button className="gradient-accent border-0 text-white shadow-lg shadow-primary/20 transition-transform hover:scale-[1.03]">
+                    Sign Up
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <Button
+                variant="ghost"
+                className="text-muted-foreground hover:text-foreground"
+                onClick={handleLogout}
+              >
+                Logout
+              </Button>
+            )}
           </div>
 
           {/* Mobile toggle */}
@@ -83,12 +110,24 @@ export function Navbar() {
               ))}
             </ul>
             <div className="mt-3 flex flex-col gap-2">
-              <Button variant="ghost" className="w-full">
-                Login
-              </Button>
-              <Button className="w-full gradient-accent border-0 text-white">
-                Sign Up
-              </Button>
+              {!user ? (
+                <>
+                  <Link href="/login">
+                    <Button variant="ghost" className="w-full">
+                      Login
+                    </Button>
+                  </Link>
+                  <Link href="/signup">
+                    <Button className="w-full gradient-accent border-0 text-white">
+                      Sign Up
+                    </Button>
+                  </Link>
+                </>
+              ) : (
+                <Button variant="ghost" className="w-full" onClick={handleLogout}>
+                  Logout
+                </Button>
+              )}
             </div>
           </div>
         )}

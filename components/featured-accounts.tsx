@@ -4,6 +4,8 @@ import { BadgeCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { InstagramIcon, FacebookIcon, XIcon } from '@/components/brand-icons'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/components/auth-provider'
 
 const accounts = [
   {
@@ -38,8 +40,14 @@ const accounts = [
 
 export function FeaturedAccounts() {
   const [loading, setLoading] = useState<string | null>(null)
+  const router = useRouter()
+  const { user } = useAuth()
 
   const handleCheckout = async (accountType: string) => {
+    if (!user) {
+      router.push('/login')
+      return
+    }
     try {
       setLoading(accountType)
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000'
@@ -75,6 +83,10 @@ export function FeaturedAccounts() {
         <Button
           variant="outline"
           className="border-border bg-transparent hover:bg-secondary"
+          onClick={() => {
+            if (!user) router.push('/login')
+            else router.push('/accounts')
+          }}
         >
           View all listings
         </Button>

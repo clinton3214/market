@@ -1,6 +1,10 @@
+'use client'
+
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { ArrowRight, ShieldCheck, Zap, Headphones } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useAuth } from '@/components/auth-provider'
 
 const trustBadges = [
   { label: 'Secure Payment', icon: ShieldCheck },
@@ -9,6 +13,9 @@ const trustBadges = [
 ]
 
 export function Hero() {
+  const router = useRouter()
+  const { user } = useAuth()
+
   return (
     <section className="relative overflow-hidden pt-40 pb-24 sm:pt-48">
       {/* Ambient gradient glow */}
@@ -35,15 +42,17 @@ export function Hero() {
         </p>
 
         <div className="mt-10 flex items-center justify-center">
-          <Link href="/accounts" passHref>
-            <Button
-              size="lg"
-              className="group h-13 gradient-accent border-0 px-8 text-base font-semibold text-white shadow-xl shadow-primary/25 transition-transform hover:scale-[1.03]"
-            >
-              Browse Accounts
-              <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Button>
-          </Link>
+          <Button
+            size="lg"
+            onClick={() => {
+              if (!user) router.push('/login')
+              else router.push('/accounts')
+            }}
+            className="group h-13 gradient-accent border-0 px-8 text-base font-semibold text-white shadow-xl shadow-primary/25 transition-transform hover:scale-[1.03]"
+          >
+            Browse Accounts
+            <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </Button>
         </div>
 
         <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
