@@ -17,7 +17,7 @@ services:
     name: marketplace-frontend
     env: node
     plan: free
-    buildCommand: corepack enable pnpm && pnpm install --no-frozen-lockfile && pnpm run build
+    buildCommand: pnpm install --no-frozen-lockfile && pnpm run build
     startCommand: pnpm run start
     envVars:
       - key: NEXT_PUBLIC_BACKEND_URL
