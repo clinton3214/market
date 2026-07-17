@@ -3,6 +3,7 @@ services:
   - type: web
     name: marketplace-backend
     env: node
+    plan: free
     buildCommand: npm install express dotenv cors needle --no-audit --no-fund --legacy-peer-deps || echo "Proceeding with native Node modules"
     startCommand: node server.js
     envVars:
@@ -15,6 +16,7 @@ services:
   - type: web
     name: marketplace-frontend
     env: node
+    plan: free
     buildCommand: corepack enable pnpm && pnpm install --no-frozen-lockfile && pnpm run build
     startCommand: pnpm run start
     envVars:
