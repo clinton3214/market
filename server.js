@@ -75,8 +75,8 @@ const server = http.createServer((req, res) => {
     req.on('data', chunk => body += chunk);
     req.on('end', async () => {
       try {
-        const { accountType, email } = JSON.parse(body);
-        const accountIndex = accounts.findIndex(acc => acc.type === accountType && !acc.is_sold);
+        const { accountId, email } = JSON.parse(body);
+        const accountIndex = accounts.findIndex(acc => acc.id === accountId && !acc.is_sold);
         
         if (accountIndex === -1) {
           res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -87,7 +87,7 @@ const server = http.createServer((req, res) => {
         
         const params = {
           email: email || "customer@example.com",
-          amount: 1500 * 100,
+          amount: account.price * 100,
           metadata: { account_id: account.id }
         };
         

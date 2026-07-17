@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { ArrowRight, ShieldCheck, Zap, Headphones } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -34,13 +35,15 @@ export function Hero() {
         </p>
 
         <div className="mt-10 flex items-center justify-center">
-          <Button
-            size="lg"
-            className="group h-13 gradient-accent border-0 px-8 text-base font-semibold text-white shadow-xl shadow-primary/25 transition-transform hover:scale-[1.03]"
-          >
-            Browse Accounts
-            <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Button>
+          <Link href="/accounts" passHref>
+            <Button
+              size="lg"
+              className="group h-13 gradient-accent border-0 px-8 text-base font-semibold text-white shadow-xl shadow-primary/25 transition-transform hover:scale-[1.03]"
+            >
+              Browse Accounts
+              <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Button>
+          </Link>
         </div>
 
         <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
