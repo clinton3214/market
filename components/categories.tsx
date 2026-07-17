@@ -41,7 +41,7 @@ export function Categories() {
         {categories.map((cat) => (
           <a
             key={cat.name}
-            href="#featured"
+            href="/accounts"
             className={`group glass-card flex flex-col justify-between rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 ${cat.glow}`}
           >
             <div className="flex items-start justify-between">

@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
-
-const usersFilePath = path.join(process.cwd(), 'data', 'users.json')
+import dbConnect from '@/lib/mongodb'
+import User from '@/models/User'
 
 export async function GET(req: Request) {
   try {
@@ -13,16 +11,15 @@ export async function GET(req: Request) {
       return NextResponse.json({ user: null }, { status: 200 })
     }
 
-    const usersData = fs.readFileSync(usersFilePath, 'utf8')
-    const users = JSON.parse(usersData)
+    await dbConnect()
 
-    const user = users.find((u: any) => u.id === userId)
+    const user = await User.findById(userId)
     
     if (!user) {
       return NextResponse.json({ user: null }, { status: 200 })
     }
 
-    return NextResponse.json({ user: { id: user.id, name: user.name, email: user.email } }, { status: 200 })
+    return NextResponse.json({ user: { id: user._id, name: user.name, email: user.email } }, { status: 200 })
   } catch (error) {
     console.error(error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })

@@ -55,7 +55,7 @@ export function AccountMarketplace() {
   ]
 
   return (
-    <section id="listings" className="mx-auto w-full max-w-6xl px-4 pb-24 pt-10 sm:pt-16">
+    <section id="listings" className="mx-auto w-full max-w-6xl px-4 pb-24 pt-28 sm:pt-32">
       {/* Glass intro panel */}
       <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.7)] backdrop-blur-2xl sm:p-10">
         <div

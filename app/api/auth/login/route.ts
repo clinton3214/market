@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
 import bcrypt from 'bcryptjs'
-
-const usersFilePath = path.join(process.cwd(), 'data', 'users.json')
+import dbConnect from '@/lib/mongodb'
+import User from '@/models/User'
 
 export async function POST(req: Request) {
   try {
@@ -13,10 +11,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
     }
 
-    const usersData = fs.readFileSync(usersFilePath, 'utf8')
-    const users = JSON.parse(usersData)
+    await dbConnect()
 
-    const user = users.find((u: any) => u.email === email)
+    const user = await User.findOne({ email })
     if (!user) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
     }
@@ -26,13 +23,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
     }
 
-    // In a real app, use JWT. For this prototype, we'll store a simple cookie with the user ID.
     const response = NextResponse.json({
       message: 'Logged in successfully',
-      user: { id: user.id, name: user.name, email: user.email }
+      user: { id: user._id, name: user.name, email: user.email }
     }, { status: 200 })
 
-    response.cookies.set('auth_token', user.id, {
+    response.cookies.set('auth_token', user._id.toString(), {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',

@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
 import bcrypt from 'bcryptjs'
-
-const usersFilePath = path.join(process.cwd(), 'data', 'users.json')
+import dbConnect from '@/lib/mongodb'
+import User from '@/models/User'
 
 export async function POST(req: Request) {
   try {
@@ -13,23 +11,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
     }
 
-    const usersData = fs.readFileSync(usersFilePath, 'utf8')
-    const users = JSON.parse(usersData)
+    await dbConnect()
 
-    if (users.find((u: any) => u.email === email)) {
+    const existingUser = await User.findOne({ email })
+    if (existingUser) {
       return NextResponse.json({ error: 'User already exists' }, { status: 400 })
     }
 
     const hashedPassword = await bcrypt.hash(password, 10)
-    const newUser = {
-      id: String(Date.now()),
+    await User.create({
       name,
       email,
       password: hashedPassword
-    }
-
-    users.push(newUser)
-    fs.writeFileSync(usersFilePath, JSON.stringify(users, null, 2))
+    })
 
     return NextResponse.json({ message: 'User created successfully' }, { status: 201 })
   } catch (error) {

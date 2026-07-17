@@ -9,6 +9,7 @@ import { useAuth } from '@/components/auth-provider'
 
 const accounts = [
   {
+    id: '1',
     platform: 'Instagram',
     Icon: InstagramIcon,
     handle: '@travel.frames',
@@ -16,6 +17,7 @@ const accounts = [
     price: '$1,450',
   },
   {
+    id: '2',
     platform: 'X',
     Icon: XIcon,
     handle: '@cryptodaily',
@@ -23,6 +25,7 @@ const accounts = [
     price: '$980',
   },
   {
+    id: '3',
     platform: 'Facebook',
     Icon: FacebookIcon,
     handle: 'Fitness Hub',
@@ -30,6 +33,7 @@ const accounts = [
     price: '$1,120',
   },
   {
+    id: '4',
     platform: 'Instagram',
     Icon: InstagramIcon,
     handle: '@street.style',
@@ -43,18 +47,18 @@ export function FeaturedAccounts() {
   const router = useRouter()
   const { user } = useAuth()
 
-  const handleCheckout = async (accountType: string) => {
+  const handleCheckout = async (accountId: string) => {
     if (!user) {
       router.push('/login')
       return
     }
     try {
-      setLoading(accountType)
+      setLoading(accountId)
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000'
       const res = await fetch(`${backendUrl}/api/checkout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accountType })
+        body: JSON.stringify({ accountId })
       })
       const data = await res.json()
       if (data.checkoutUrl) {
@@ -120,11 +124,11 @@ export function FeaturedAccounts() {
               <span className="text-lg font-bold">{acc.price}</span>
               <Button
                 size="sm"
-                onClick={() => handleCheckout(acc.platform)}
-                disabled={loading === acc.platform}
+                onClick={() => handleCheckout(acc.id)}
+                disabled={loading === acc.id}
                 className="gradient-accent border-0 text-white transition-transform group-hover:scale-105"
               >
-                {loading === acc.platform ? 'Processing...' : 'Buy'}
+                {loading === acc.id ? 'Processing...' : 'Buy'}
               </Button>
             </div>
           </article>

@@ -1,9 +1,11 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { BadgeCheck, Menu, X } from "lucide-react"
 
 const navLinks = [
+  { label: "Home", href: "/" },
   { label: "Instagram", href: "#listings" },
   { label: "Facebook", href: "#listings" },
   { label: "X", href: "#listings" },
@@ -16,7 +18,7 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false)
 
   return (
-    <header className="sticky top-4 z-50 mx-auto w-full max-w-6xl px-4">
+    <header className="fixed top-4 inset-x-0 z-50 mx-auto w-full max-w-6xl px-4">
       <div className="flex items-center justify-between gap-4 rounded-full border border-white/10 bg-card/40 px-4 py-2.5 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.6)] backdrop-blur-xl sm:px-6">
         <a href="#" className="flex items-center gap-2.5">
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary to-chart-3 text-primary-foreground">
@@ -27,13 +29,13 @@ export function SiteHeader() {
 
         <nav className="hidden items-center gap-7 lg:flex" aria-label="Primary">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.label}
               href={link.href}
               className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
@@ -54,14 +56,14 @@ export function SiteHeader() {
           aria-label="Mobile"
         >
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.label}
               href={link.href}
               onClick={() => setOpen(false)}
               className="rounded-xl px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </nav>
       ) : null}
