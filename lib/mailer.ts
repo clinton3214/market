@@ -1,25 +1,30 @@
 import nodemailer from 'nodemailer';
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT || '465', 10),
-  secure: process.env.SMTP_SECURE === 'true' || true,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
-
 export async function sendVerificationEmail(to: string, code: string) {
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+
   // If SMTP config is missing, just log the code for local dev
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+  if (!user || !pass) {
     console.warn('⚠️ SMTP_USER or SMTP_PASS is missing in .env. Logging verification code to console instead of sending email.');
     console.log(`\n=========================================\nMock Email to: ${to}\nVerification Code: ${code}\n=========================================\n`);
     return true;
   }
 
+  console.log(`Attempting to send email via ${process.env.SMTP_HOST || 'smtp.gmail.com'} as ${user}`);
+
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.SMTP_PORT || '465', 10),
+    secure: process.env.SMTP_SECURE === 'true' || true,
+    auth: {
+      user,
+      pass,
+    },
+  });
+
   const mailOptions = {
-    from: `"Travis Pay" <${process.env.SMTP_USER}>`,
+    from: `"Travis Pay" <${user}>`,
     to,
     subject: 'Your Verification Code',
     html: `
@@ -36,6 +41,7 @@ export async function sendVerificationEmail(to: string, code: string) {
 
   try {
     await transporter.sendMail(mailOptions);
+    console.log('Verification email sent successfully to', to);
     return true;
   } catch (error) {
     console.error('Failed to send verification email:', error);

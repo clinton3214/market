@@ -23,6 +23,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
     }
 
+    if (user.isVerified === false) {
+      return NextResponse.json({ error: 'Please verify your email first' }, { status: 403 })
+    }
+
     const response = NextResponse.json({
       message: 'Logged in successfully',
       user: { id: user._id, name: user.name, email: user.email }
