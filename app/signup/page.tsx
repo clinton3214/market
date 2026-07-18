@@ -37,6 +37,21 @@ export default function SignupPage() {
     return () => clearInterval(interval)
   }, [resendTimer])
 
+  useEffect(() => {
+    // Check if we were redirected from login for verification
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const verifyEmailParam = params.get('verifyEmail')
+      if (verifyEmailParam) {
+        setEmail(verifyEmailParam)
+        setStep('verify')
+        setResendTimer(60) // Assuming a new code was just sent
+        // Clean up the URL
+        window.history.replaceState({}, '', '/signup')
+      }
+    }
+  }, [])
+
   async function handleSignupSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)

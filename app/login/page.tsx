@@ -31,7 +31,11 @@ export default function LoginPage() {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error || 'Something went wrong')
+        if (data.isVerified === false && data.email) {
+          router.push(`/signup?verifyEmail=${encodeURIComponent(data.email)}`)
+        } else {
+          setError(data.error || 'Something went wrong')
+        }
       } else {
         setUser(data.user)
         router.push('/')

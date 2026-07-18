@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import dbConnect from '@/lib/mongodb'
 import User from '@/models/User'
+import { sendVerificationEmail } from '@/lib/mailer'
 
 export async function POST(req: Request) {
   try {
@@ -24,7 +25,21 @@ export async function POST(req: Request) {
     }
 
     if (user.isVerified === false) {
-      return NextResponse.json({ error: 'Please verify your email first' }, { status: 403 })
+      // Automatically resend verification email on login attempt
+      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString()
+      const verificationCodeExpiresAt = new Date(Date.now() + 10 * 60 * 1000)
+      
+      user.verificationCode = verificationCode
+      user.verificationCodeExpiresAt = verificationCodeExpiresAt
+      await user.save()
+
+      await sendVerificationEmail(email, verificationCode)
+
+      return NextResponse.json({ 
+        error: 'Please verify your email first', 
+        isVerified: false,
+        email: user.email 
+      }, { status: 403 })
     }
 
     const response = NextResponse.json({
