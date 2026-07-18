@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import dbConnect from '@/lib/mongodb'
 import User from '@/models/User'
+import { sendVerificationEmail } from '@/lib/mailer'
 
 export async function POST(req: Request) {
   try {
@@ -19,13 +20,23 @@ export async function POST(req: Request) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10)
+    
+    // Generate 6 digit code
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString()
+    const verificationCodeExpiresAt = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes from now
+
     await User.create({
       name,
       email,
-      password: hashedPassword
+      password: hashedPassword,
+      isVerified: false,
+      verificationCode,
+      verificationCodeExpiresAt
     })
 
-    return NextResponse.json({ message: 'User created successfully' }, { status: 201 })
+    await sendVerificationEmail(email, verificationCode)
+
+    return NextResponse.json({ message: 'User created. Please verify your email.', email }, { status: 201 })
   } catch (error) {
     console.error(error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
