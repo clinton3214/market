@@ -54,26 +54,36 @@ export default function SignupPage() {
 
   async function handleSignupSubmit(e: React.FormEvent) {
     e.preventDefault()
+    console.log("=== Frontend: handleSignupSubmit triggered ===")
+    console.log("Payload:", { name, email }) // omitted password for safety in logs
+    
     setLoading(true)
     setError('')
 
     try {
+      console.log("Sending fetch request to /api/auth/signup...")
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }),
       })
+      console.log("Response status:", res.status)
       const data = await res.json()
+      console.log("Response data:", data)
 
       if (!res.ok) {
+        console.error("API Error Response:", data.error)
         setError(data.error || 'Something went wrong')
       } else {
+        console.log("Signup successful, moving to verify step.")
         setStep('verify')
         setResendTimer(60) // Start 60s countdown
       }
     } catch (err) {
+      console.error("Frontend Catch Block Error:", err)
       setError('Network error')
     } finally {
+      console.log("=== Frontend: handleSignupSubmit finished ===")
       setLoading(false)
     }
   }
