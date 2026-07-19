@@ -86,7 +86,7 @@ export default function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
           icon={<Lock className="size-4" />}
           labelAction={
-            <Link href="#" className="text-xs font-medium text-primary hover:underline">
+            <Link href="/forgot-password" className="text-xs font-medium text-primary hover:underline">
               Forgot password?
             </Link>
           }
