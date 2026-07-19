@@ -18,19 +18,19 @@ export async function sendVerificationEmail(to: string, code: string) {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: \`"Travis Pay" <\${fromEmail}>\`,
+      from: `"Travis Pay" <${fromEmail}>`,
       to,
       subject: 'Your Verification Code',
-      html: \`
+      html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #000; color: #fff; border-radius: 8px;">
           <h1 style="color: #fff; text-align: center;">Travis Pay</h1>
           <div style="background-color: #111; padding: 20px; border-radius: 8px; border: 1px solid #333; text-align: center;">
             <p style="color: #ccc; margin-bottom: 20px;">Enter the 6-digit code below to verify your email address and confirm your account.</p>
-            <div style="font-size: 32px; font-weight: bold; letter-spacing: 4px; color: #9333ea; margin: 20px 0;">\${code}</div>
+            <div style="font-size: 32px; font-weight: bold; letter-spacing: 4px; color: #9333ea; margin: 20px 0;">${code}</div>
             <p style="color: #666; font-size: 14px;">This code will expire in 10 minutes.</p>
           </div>
         </div>
-      \`,
+      `,
     });
 
     if (error) {
