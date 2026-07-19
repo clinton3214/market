@@ -6,7 +6,9 @@ import { sendVerificationEmail } from '@/lib/mailer'
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password } = await req.json()
+    const body = await req.json()
+    console.log("Signup triggered with payload:", body)
+    const { name, email, password } = body
 
     if (!name || !email || !password) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
@@ -38,7 +40,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ message: 'User created. Please verify your email.', email }, { status: 201 })
   } catch (error) {
-    console.error(error)
+    console.error("Mailer error:", error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }
