@@ -23,10 +23,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Out of stock" }, { status: 400 });
     }
     
+    const origin = request.headers.get('origin') || 'http://localhost:3000';
+    
     const params = {
       email: email || "customer@example.com",
       amount: account.price * 100, // Paystack amount is in kobo/cents
-      metadata: { account_id: account._id.toString() }
+      metadata: { account_id: account._id.toString() },
+      callback_url: `${origin}/success`
     };
     
     try {
