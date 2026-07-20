@@ -12,12 +12,12 @@ type AuthShellProps = {
 
 export function AuthShell({ title, subtitle, badge, children, footer }: AuthShellProps) {
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
+    <main className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden px-4 py-10">
       {/* atmospheric background */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute left-[18%] top-[12%] size-[26rem] rounded-full bg-primary/40 blur-[120px]" />
-        <div className="absolute bottom-[10%] right-[18%] size-[28rem] rounded-full bg-accent/30 blur-[130px]" />
-        <div className="absolute left-1/2 top-1/2 size-[20rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/25 blur-[110px]" />
+        <div className="absolute left-[18%] top-[12%] size-[26rem] rounded-full bg-primary/40 blur-[120px] transform-gpu" />
+        <div className="absolute bottom-[10%] right-[18%] size-[28rem] rounded-full bg-accent/30 blur-[130px] transform-gpu" />
+        <div className="absolute left-1/2 top-1/2 size-[20rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/25 blur-[110px] transform-gpu" />
         <div
           className="absolute inset-0 opacity-[0.15]"
           style={{

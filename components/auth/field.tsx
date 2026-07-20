@@ -33,7 +33,7 @@ export function Field({
       </div>
       <div className="relative">
         {icon && (
-          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+          <span className="pointer-events-none absolute left-3 top-1/2 z-10 -translate-y-1/2 text-muted-foreground">
             {icon}
           </span>
         )}
@@ -54,7 +54,7 @@ export function Field({
             type="button"
             onClick={() => setShow((s) => !s)}
             aria-label={show ? 'Hide password' : 'Show password'}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+            className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
           >
             {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
           </button>
