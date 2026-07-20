@@ -1,0 +1,91 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-travis-purple: #6366f1;
+  --color-travis-purple-dark: #4f46e5;
+  --color-status-green: #22c55e;
+  --color-status-yellow: #eab308;
+  --color-status-gray: #6b7280;
+  --color-dark-bg: #0a0a0a;
+  --color-dark-card: #121212;
+  --color-dark-border: #262626;
+  --color-background: #0a0a0a;
+  --color-foreground: #ffffff;
+  --color-card: #121212;
+  --color-card-foreground: #ffffff;
+  --color-primary: #6366f1;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #1e1e1e;
+  --color-secondary-foreground: #ffffff;
+  --color-muted: #404040;
+  --color-muted-foreground: #a3a3a3;
+  --color-accent: #6366f1;
+  --color-accent-foreground: #ffffff;
+  --color-destructive: #ef4444;
+  --color-border: #262626;
+  --color-input: #1e1e1e;
+  --color-ring: #6366f1;
+  --radius-sm: 0.45rem;
+  --radius-md: 0.6rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1.05rem;
+  --radius-2xl: 1.35rem;
+  --radius-3xl: 1.65rem;
+  --radius-4xl: 1.95rem;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Glass and Shimmer Effects */
+@layer utilities {
+  .transition-smooth {
+    @apply transition-all duration-300 ease-out;
+  }
+  
+  .glass-effect {
+    @apply backdrop-blur-xl bg-gradient-to-br from-white/5 to-white/2 border border-white/10 shadow-2xl;
+  }
+
+  .glass-header {
+    @apply backdrop-blur-2xl bg-gradient-to-br from-white/8 via-white/4 to-white/2 border border-white/15 shadow-2xl;
+  }
+
+  .card-subtle {
+    @apply bg-[#0f0f0f] border border-[#262626] rounded-2xl;
+  }
+
+  .glow-purple {
+    @apply shadow-[0_0_30px_rgba(99,102,241,0.2)];
+  }
+
+  .pulse-subtle {
+    @apply animate-pulse;
+  }
+
+  .glass-shine {
+    @apply relative overflow-hidden;
+  }
+
+  .glass-shine::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 opacity-30;
+    animation: shimmer 30s infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%) skewX(-12deg);
+    }
+    100% {
+      transform: translateX(100%) skewX(-12deg);
+    }
+  }
+}

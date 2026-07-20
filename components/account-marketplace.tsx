@@ -1,8 +1,8 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 import { Search, ShieldCheck, Zap, Sparkles } from "lucide-react"
-import { accounts, platformMeta, type Platform } from "@/lib/accounts"
+import { platformMeta, type Platform, type Account } from "@/lib/accounts"
 import { AccountCard } from "@/components/account-card"
 import { PlatformIcon } from "@/components/platform-icon"
 
@@ -17,8 +17,27 @@ const filters: { value: Filter; label: string }[] = [
 ]
 
 export function AccountMarketplace() {
+  const [accounts, setAccounts] = useState<Account[]>([])
   const [active, setActive] = useState<Filter>("all")
   const [query, setQuery] = useState("")
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchAccounts() {
+      try {
+        const res = await fetch("/api/listings")
+        if (res.ok) {
+          const data = await res.json()
+          setAccounts(data)
+        }
+      } catch (err) {
+        console.error("Failed to fetch accounts:", err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchAccounts()
+  }, [])
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -35,9 +54,13 @@ export function AccountMarketplace() {
 
   const counts = useMemo(() => {
     const c: Record<Filter, number> = { all: accounts.length, instagram: 0, facebook: 0, x: 0, telegram: 0 }
-    for (const a of accounts) c[a.platform] += 1
+    for (const a of accounts) {
+      if (c[a.platform] !== undefined) {
+        c[a.platform] += 1
+      }
+    }
     return c
-  }, [])
+  }, [accounts])
 
   const totalFollowers = useMemo(() => {
     // rough sum for display flavor
@@ -46,7 +69,7 @@ export function AccountMarketplace() {
       const mult = a.followers.toUpperCase().includes("M") ? 1_000_000 : a.followers.toUpperCase().includes("K") ? 1_000 : 1
       return sum + (Number.isNaN(n) ? 0 : n * mult)
     }, 0)
-  }, [])
+  }, [accounts])
 
   const stats = [
     { icon: Sparkles, label: "Live listings", value: accounts.length.toString() },
@@ -134,7 +157,11 @@ export function AccountMarketplace() {
         </div>
       </div>
 
-      {filtered.length > 0 ? (
+      {isLoading ? (
+        <div className="mt-16 rounded-3xl border border-white/10 bg-white/[0.04] p-10 text-center backdrop-blur-md">
+          <p className="text-muted-foreground animate-pulse">Loading accounts...</p>
+        </div>
+      ) : filtered.length > 0 ? (
         <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filtered.map((account) => (
             <AccountCard key={account.id} account={account} />

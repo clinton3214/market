@@ -90,3 +90,61 @@ export async function sendPasswordResetEmail(to: string, resetLink: string) {
     return false;
   }
 }
+
+export async function sendAccountCredentialsEmail(to: string, accountDetails: any) {
+  const apiKey = process.env.RESEND_API_KEY;
+
+  const emailBody = `
+--- ACCOUNT ACCESS DETAILS ---
+Platform: ${accountDetails.platform} (${accountDetails.handle})
+Account Username: ${accountDetails.credentials?.accountUsername || accountDetails.handle}
+Account Password: ${accountDetails.credentials?.accountPassword || 'N/A'}
+Associated Email: ${accountDetails.credentials?.accountEmail || 'N/A'}
+Email Password: ${accountDetails.credentials?.emailPassword || 'N/A'}
+------------------------------
+  `;
+
+  if (!apiKey) {
+    console.warn('⚠️ RESEND_API_KEY is missing in .env. Logging credentials to console instead of sending email.');
+    console.log(`\n=========================================\nMock Credentials Email to: ${to}\n${emailBody}\n=========================================\n`);
+    return true;
+  }
+
+  const resend = new Resend(apiKey);
+  const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+
+  console.log(`Attempting to send credentials email via Resend as ${fromEmail}`);
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: `"Travis Pay" <${fromEmail}>`,
+      to,
+      subject: 'Your Account Credentials - Travis Pay',
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #000; color: #fff; border-radius: 8px;">
+          <h1 style="color: #fff; text-align: center;">Travis Pay</h1>
+          <div style="background-color: #111; padding: 20px; border-radius: 8px; border: 1px solid #333;">
+            <h2 style="color: #22c55e; margin-bottom: 20px; text-align: center;">Purchase Successful!</h2>
+            <p style="color: #ccc; margin-bottom: 20px;">Here are the credentials for your newly purchased account:</p>
+            <pre style="background-color: #222; padding: 15px; border-radius: 6px; color: #fff; font-size: 14px; overflow-x: auto;">
+${emailBody.trim()}
+            </pre>
+            <p style="color: #666; font-size: 14px; margin-top: 20px;">Please secure this account by changing the passwords immediately.</p>
+          </div>
+        </div>
+      `,
+    });
+
+    if (error) {
+      console.error('Resend API Error (Credentials):', error);
+      return false;
+    }
+
+    console.log('Credentials email sent successfully to', to);
+    return true;
+  } catch (error) {
+    console.error('Failed to send credentials email:', error);
+    return false;
+  }
+}
+
