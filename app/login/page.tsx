@@ -37,8 +37,12 @@ export default function LoginPage() {
           setError(data.error || 'Something went wrong')
         }
       } else {
-        setUser(data.user)
-        router.push('/')
+        if (data.isAdmin) {
+          router.push('/admin')
+        } else {
+          setUser(data.user)
+          router.push('/')
+        }
       }
     } catch (err) {
       setError('Network error')

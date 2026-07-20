@@ -8,7 +8,7 @@ const listingSchema = new mongoose.Schema(
     followers: { type: String, required: true },
     category: { type: String },
     price: { type: Number, required: true },
-    verified: { type: Boolean, default: false },
+    verified: { type: Boolean, default: true },
     engagement: { type: String },
     status: { type: String, enum: ['available', 'sold'], default: 'available' },
     

@@ -74,7 +74,7 @@ export function AccountCard({ account }: { account: Account }) {
       </div>
 
       <div className="relative mt-5 flex items-center justify-between border-t border-white/10 pt-4">
-        <p className="font-display text-xl font-bold">${account.price.toLocaleString()}</p>
+        <p className="font-display text-xl font-bold">₦{account.price.toLocaleString()}</p>
         <Button 
           onClick={handleCheckout} 
           disabled={loading}

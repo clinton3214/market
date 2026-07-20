@@ -9,7 +9,12 @@ export async function GET(request: Request) {
     // Fetch only available listings, exclude credentials
     const listings = await Listing.find({ status: 'available' }).select('-credentials -__v');
     
-    return NextResponse.json(listings);
+    const formattedListings = listings.map(l => ({
+      ...l.toObject(),
+      id: l._id.toString()
+    }));
+
+    return NextResponse.json(formattedListings);
   } catch (error) {
     console.error('Error fetching listings:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

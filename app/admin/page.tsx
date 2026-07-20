@@ -72,6 +72,7 @@ export default function AdminDashboard() {
         followers: formData.followers,
         price: Number(formData.price),
         status: 'available',
+        verified: true,
         credentials: {
           accountEmail: formData.accountEmail,
           emailPassword: formData.emailPassword,
@@ -161,7 +162,7 @@ export default function AdminDashboard() {
                 <div>
                   <p className="text-muted-foreground text-sm mb-1">Total Revenue</p>
                   <p className="text-3xl font-bold bg-gradient-to-r from-primary to-chart-2 bg-clip-text text-transparent">
-                    ${totalRevenue.toLocaleString()}
+                    ₦{totalRevenue.toLocaleString()}
                   </p>
                 </div>
                 <ArrowUpRight className="w-5 h-5 text-status-green" />
@@ -241,7 +242,7 @@ export default function AdminDashboard() {
 
                     <div className="flex justify-between items-center mb-4">
                       <p className="text-sm text-muted-foreground">{account.followers} followers</p>
-                      <p className="text-lg font-bold text-primary">${account.price}</p>
+                      <p className="text-lg font-bold text-primary">₦{account.price.toLocaleString()}</p>
                     </div>
 
                     <div className="flex gap-2 mt-4 pt-4 border-t border-border">
@@ -312,7 +313,7 @@ export default function AdminDashboard() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-foreground">Price (USD)</label>
+                  <label className="text-sm font-medium text-foreground">Price (NGN)</label>
                   <input
                     required
                     value={formData.price}
