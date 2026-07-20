@@ -101,6 +101,8 @@ Account Username: ${accountDetails.credentials?.accountUsername || accountDetail
 Account Password: ${accountDetails.credentials?.accountPassword || 'N/A'}
 Associated Email: ${accountDetails.credentials?.accountEmail || 'N/A'}
 Email Password: ${accountDetails.credentials?.emailPassword || 'N/A'}
+${accountDetails.credentials?.twoFactorAuth ? `2FA String: ${accountDetails.credentials.twoFactorAuth}\n(Paste this string into 2fa.live to get your 6-digit login code)` : ''}
+${accountDetails.credentials?.backupCode ? `Backup Code: ${accountDetails.credentials.backupCode}` : ''}
 ------------------------------
   `;
 

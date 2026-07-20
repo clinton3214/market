@@ -50,6 +50,8 @@ Account Username: ${creds.accountUsername || details.handle}
 Account Password: ${creds.accountPassword || 'N/A'}
 Associated Email: ${creds.accountEmail || 'N/A'}
 Email Password: ${creds.emailPassword || 'N/A'}
+${creds.twoFactorAuth ? `\n2FA String: ${creds.twoFactorAuth}\n(Paste this string into 2fa.live to get your 6-digit login code)` : ''}
+${creds.backupCode ? `\nBackup Code: ${creds.backupCode}` : ''}
 
 Thank you for your purchase via Travis Pay!
 ------------------------------
@@ -115,6 +117,27 @@ Thank you for your purchase via Travis Pay!
               <span className="text-muted-foreground">Email Password:</span>
               <p className="text-foreground break-all">{details.credentials.emailPassword || 'N/A'}</p>
             </div>
+            
+            {(details.credentials.twoFactorAuth || details.credentials.backupCode) && (
+              <>
+                <hr className="border-border/50" />
+                {details.credentials.twoFactorAuth && (
+                  <div>
+                    <span className="text-muted-foreground">2FA String:</span>
+                    <p className="text-foreground break-all font-bold text-primary">{details.credentials.twoFactorAuth}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Paste this string to <a href="https://2fa.live" target="_blank" rel="noreferrer" className="text-primary hover:underline">2fa.live</a> to get your 6-digit code.
+                    </p>
+                  </div>
+                )}
+                {details.credentials.backupCode && (
+                  <div>
+                    <span className="text-muted-foreground">Backup Code:</span>
+                    <p className="text-foreground break-all">{details.credentials.backupCode}</p>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
 

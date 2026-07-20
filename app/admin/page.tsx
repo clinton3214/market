@@ -16,6 +16,8 @@ type Account = {
     emailPassword?: string;
     accountUsername?: string;
     accountPassword?: string;
+    twoFactorAuth?: string;
+    backupCode?: string;
   };
 };
 
@@ -26,6 +28,7 @@ export default function AdminDashboard() {
   const [showPassword, setShowPassword] = useState<Record<string, boolean>>({});
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -37,6 +40,8 @@ export default function AdminDashboard() {
     emailPassword: '',
     accountUsername: '',
     accountPassword: '',
+    twoFactorAuth: '',
+    backupCode: '',
   });
 
   useEffect(() => {
@@ -63,6 +68,29 @@ export default function AdminDashboard() {
     setShowPassword((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const handleEdit = (account: Account) => {
+    setEditingId(account.id || account._id || null);
+    setFormData({
+      platform: account.platform,
+      handle: account.handle,
+      followers: account.followers,
+      price: account.price.toString(),
+      accountEmail: account.credentials?.accountEmail || '',
+      emailPassword: account.credentials?.emailPassword || '',
+      accountUsername: account.credentials?.accountUsername || '',
+      accountPassword: account.credentials?.accountPassword || '',
+      twoFactorAuth: account.credentials?.twoFactorAuth || '',
+      backupCode: account.credentials?.backupCode || '',
+    });
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setEditingId(null);
+    setFormData({ platform: 'instagram', handle: '', followers: '', price: '', accountEmail: '', emailPassword: '', accountUsername: '', accountPassword: '', twoFactorAuth: '', backupCode: '' });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -78,18 +106,28 @@ export default function AdminDashboard() {
           emailPassword: formData.emailPassword,
           accountUsername: formData.accountUsername || formData.handle,
           accountPassword: formData.accountPassword,
+          twoFactorAuth: formData.twoFactorAuth,
+          backupCode: formData.backupCode,
         },
       };
 
-      const res = await fetch('/api/admin/listings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newListing),
-      });
+      let res;
+      if (editingId) {
+        res = await fetch('/api/admin/listings', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ _id: editingId, ...newListing }),
+        });
+      } else {
+        res = await fetch('/api/admin/listings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newListing),
+        });
+      }
 
       if (res.ok) {
-        setShowModal(false);
-        setFormData({ platform: 'instagram', handle: '', followers: '', price: '', accountEmail: '', emailPassword: '', accountUsername: '', accountPassword: '' });
+        closeModal();
         fetchListings();
       }
     } catch (err) {
@@ -194,7 +232,11 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-foreground">Account Inventory</h2>
               <button
-                onClick={() => setShowModal(true)}
+                onClick={() => {
+                  setEditingId(null);
+                  setFormData({ platform: 'instagram', handle: '', followers: '', price: '', accountEmail: '', emailPassword: '', accountUsername: '', accountPassword: '', twoFactorAuth: '', backupCode: '' });
+                  setShowModal(true);
+                }}
                 className="bg-gradient-to-r from-primary to-chart-4 text-primary-foreground px-6 py-2 rounded-full hover:opacity-90 transition-all text-sm font-semibold"
               >
                 + Add Account
@@ -246,7 +288,7 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className="flex gap-2 mt-4 pt-4 border-t border-border">
-                      <button className="flex-1 bg-secondary hover:bg-secondary/80 text-foreground px-3 py-2 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
+                      <button onClick={() => handleEdit(account)} className="flex-1 bg-secondary hover:bg-secondary/80 text-foreground px-3 py-2 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
                         <Edit2 className="w-4 h-4" /> Edit
                       </button>
                       <button onClick={() => handleDelete(account.id)} className="flex-1 bg-destructive/10 hover:bg-destructive/20 text-destructive px-3 py-2 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
@@ -266,8 +308,8 @@ export default function AdminDashboard() {
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-card border border-border rounded-2xl max-w-xl w-full p-6 max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-2xl font-bold text-foreground">Add New Account</h3>
-              <button onClick={() => setShowModal(false)} className="text-muted-foreground hover:text-foreground">
+              <h3 className="text-2xl font-bold text-foreground">{editingId ? 'Edit Account' : 'Add New Account'}</h3>
+              <button onClick={closeModal} className="text-muted-foreground hover:text-foreground">
                 <X className="w-6 h-6" />
               </button>
             </div>
@@ -369,12 +411,35 @@ export default function AdminDashboard() {
                     className="w-full bg-secondary border border-border rounded-lg px-3 py-2.5 text-foreground mt-1 focus:outline-none focus:border-primary"
                   />
                 </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground">2FA String</label>
+                  <input
+                    value={formData.twoFactorAuth}
+                    onChange={(e) => setFormData({...formData, twoFactorAuth: e.target.value})}
+                    type="text"
+                    placeholder="2FA Auth String"
+                    className="w-full bg-secondary border border-border rounded-lg px-3 py-2.5 text-foreground mt-1 focus:outline-none focus:border-primary"
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Note: Paste 2FA string to <a href="https://2fa.live" target="_blank" rel="noreferrer" className="text-primary hover:underline">2fa.live</a> to get 6 digit code. This string is only seen by the buyer after payment and is not part of the public information.
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground">Backup Code</label>
+                  <input
+                    value={formData.backupCode}
+                    onChange={(e) => setFormData({...formData, backupCode: e.target.value})}
+                    type="text"
+                    placeholder="8-digit backup code"
+                    className="w-full bg-secondary border border-border rounded-lg px-3 py-2.5 text-foreground mt-1 focus:outline-none focus:border-primary"
+                  />
+                </div>
               </div>
 
               <div className="flex gap-3 pt-6">
                 <button
                   type="button"
-                  onClick={() => setShowModal(false)}
+                  onClick={closeModal}
                   className="flex-1 bg-secondary hover:bg-secondary/80 text-foreground px-4 py-3 rounded-xl font-medium transition"
                 >
                   Cancel

@@ -18,6 +18,8 @@ const listingSchema = new mongoose.Schema(
       emailPassword: { type: String },
       accountUsername: { type: String },
       accountPassword: { type: String },
+      twoFactorAuth: { type: String },
+      backupCode: { type: String },
     },
   },
   { timestamps: true }
