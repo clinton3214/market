@@ -4,7 +4,7 @@ import Listing from '@/models/Listing';
 
 export const dynamic = 'force-dynamic';
 
-const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY || 'sk_test_dummy';
+const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 
 export async function POST(request: Request) {
   try {
@@ -44,17 +44,11 @@ export async function POST(request: Request) {
       if (data && data.status) {
         return NextResponse.json({ checkoutUrl: data.data.authorization_url });
       } else {
-        if (PAYSTACK_SECRET_KEY === 'sk_test_dummy') {
-          return NextResponse.json({ checkoutUrl: 'https://checkout.paystack.com/dummy' });
-        }
-        return NextResponse.json({ error: "Failed to initialize payment" }, { status: 500 });
+        return NextResponse.json({ error: data.message || "Failed to initialize payment" }, { status: 400 });
       }
     } catch (fetchErr) {
-      // If network is completely down for fetch, but using dummy key
-      if (PAYSTACK_SECRET_KEY === 'sk_test_dummy') {
-        return NextResponse.json({ checkoutUrl: 'https://checkout.paystack.com/dummy' });
-      }
-      throw fetchErr;
+      console.error('Paystack Fetch Error:', fetchErr);
+      return NextResponse.json({ error: "Failed to connect to payment gateway" }, { status: 500 });
     }
   } catch (err) {
     console.error(err);

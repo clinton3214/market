@@ -4,7 +4,7 @@ import dbConnect from '@/lib/mongodb';
 import Listing from '@/models/Listing';
 import { sendAccountCredentialsEmail } from '@/lib/mailer';
 
-const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY || 'sk_test_dummy';
+const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 
 export async function POST(request: Request) {
   try {
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     }
 
     const hash = crypto
-      .createHmac('sha512', PAYSTACK_SECRET_KEY)
+      .createHmac('sha512', PAYSTACK_SECRET_KEY || '')
       .update(bodyText)
       .digest('hex');
 
