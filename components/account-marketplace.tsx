@@ -45,9 +45,9 @@ export function AccountMarketplace() {
       const matchPlatform = active === "all" || a.platform === active
       const matchQuery =
         q === "" ||
-        a.handle.toLowerCase().includes(q) ||
-        a.name.toLowerCase().includes(q) ||
-        a.category.toLowerCase().includes(q)
+        a.handle?.toLowerCase().includes(q) ||
+        a.name?.toLowerCase().includes(q) ||
+        a.category?.toLowerCase().includes(q)
       return matchPlatform && matchQuery
     })
   }, [active, query])

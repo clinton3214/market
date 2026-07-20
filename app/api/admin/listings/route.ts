@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Listing from '@/models/Listing';
 
+export const dynamic = 'force-dynamic';
+
 // Helper to check auth
 function isAuthenticated(request: Request) {
   const cookieHeader = request.headers.get('cookie') || '';

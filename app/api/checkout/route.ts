@@ -2,16 +2,22 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Listing from '@/models/Listing';
 
+export const dynamic = 'force-dynamic';
+
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY || 'sk_test_dummy';
 
 export async function POST(request: Request) {
   try {
     const { accountId, email } = await request.json();
     
+    console.log('[Checkout API] Received accountId:', accountId);
+    
     await dbConnect();
     
     // Ensure the listing is still available
     const account = await Listing.findOne({ _id: accountId, status: 'available' });
+    
+    console.log('[Checkout API] Found account:', account);
     
     if (!account) {
       return NextResponse.json({ error: "Out of stock" }, { status: 400 });
