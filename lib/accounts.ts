@@ -10,6 +10,7 @@ export type Account = {
   price: number
   verified: boolean
   engagement: string
+  description?: string
 }
 
 export const platformMeta: Record<

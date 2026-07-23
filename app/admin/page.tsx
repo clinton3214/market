@@ -19,6 +19,7 @@ type Account = {
     twoFactorAuth?: string;
     backupCode?: string;
   };
+  description?: string;
 };
 
 export default function AdminDashboard() {
@@ -42,6 +43,7 @@ export default function AdminDashboard() {
     accountPassword: '',
     twoFactorAuth: '',
     backupCode: '',
+    description: '',
   });
 
   useEffect(() => {
@@ -81,6 +83,7 @@ export default function AdminDashboard() {
       accountPassword: account.credentials?.accountPassword || '',
       twoFactorAuth: account.credentials?.twoFactorAuth || '',
       backupCode: account.credentials?.backupCode || '',
+      description: account.description || '',
     });
     setShowModal(true);
   };
@@ -88,7 +91,7 @@ export default function AdminDashboard() {
   const closeModal = () => {
     setShowModal(false);
     setEditingId(null);
-    setFormData({ platform: 'instagram', handle: '', followers: '', price: '', accountEmail: '', emailPassword: '', accountUsername: '', accountPassword: '', twoFactorAuth: '', backupCode: '' });
+    setFormData({ platform: 'instagram', handle: '', followers: '', price: '', accountEmail: '', emailPassword: '', accountUsername: '', accountPassword: '', twoFactorAuth: '', backupCode: '', description: '' });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -99,6 +102,7 @@ export default function AdminDashboard() {
         handle: formData.handle,
         followers: formData.followers,
         price: Number(formData.price),
+        description: formData.description,
         status: 'available',
         verified: true,
         credentials: {
@@ -234,7 +238,7 @@ export default function AdminDashboard() {
               <button
                 onClick={() => {
                   setEditingId(null);
-                  setFormData({ platform: 'instagram', handle: '', followers: '', price: '', accountEmail: '', emailPassword: '', accountUsername: '', accountPassword: '', twoFactorAuth: '', backupCode: '' });
+                  setFormData({ platform: 'instagram', handle: '', followers: '', price: '', accountEmail: '', emailPassword: '', accountUsername: '', accountPassword: '', twoFactorAuth: '', backupCode: '', description: '' });
                   setShowModal(true);
                 }}
                 className="bg-gradient-to-r from-primary to-chart-4 text-primary-foreground px-6 py-2 rounded-full hover:opacity-90 transition-all text-sm font-semibold"
@@ -365,6 +369,17 @@ export default function AdminDashboard() {
                     className="w-full bg-secondary border border-border rounded-lg px-3 py-2.5 text-foreground mt-1 focus:outline-none focus:border-primary"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-foreground">Description</label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                  placeholder="Enter a brief description of the account..."
+                  rows={3}
+                  className="w-full bg-secondary border border-border rounded-lg px-3 py-2.5 text-foreground mt-1 focus:outline-none focus:border-primary resize-none"
+                />
               </div>
 
               <hr className="border-border my-6" />

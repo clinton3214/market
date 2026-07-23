@@ -10,6 +10,7 @@ const listingSchema = new mongoose.Schema(
     price: { type: Number, required: true },
     verified: { type: Boolean, default: true },
     engagement: { type: String },
+    description: { type: String },
     status: { type: String, enum: ['available', 'sold'], default: 'available' },
     
     // SECURE FIELDS (Never sent to the public frontend unless explicitly selected)

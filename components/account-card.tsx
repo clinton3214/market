@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 
 export function AccountCard({ account }: { account: Account }) {
   const [loading, setLoading] = useState(false)
+  const [showDescription, setShowDescription] = useState(false)
 
   const handleCheckout = async () => {
     try {
@@ -32,7 +33,10 @@ export function AccountCard({ account }: { account: Account }) {
   }
 
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] p-5 shadow-[0_16px_40px_-24px_rgba(0,0,0,0.8)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.07]">
+    <article 
+      onClick={() => setShowDescription(!showDescription)}
+      className="group relative flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] p-5 shadow-[0_16px_40px_-24px_rgba(0,0,0,0.8)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.07] cursor-pointer"
+    >
       {/* glass sheen on hover */}
       <div
         aria-hidden
@@ -65,6 +69,11 @@ export function AccountCard({ account }: { account: Account }) {
             {account.engagement}
           </span>
         </div>
+        {showDescription && account.description && (
+          <div className="mt-4 text-sm text-muted-foreground/90 leading-relaxed animate-in fade-in slide-in-from-top-2">
+            {account.description}
+          </div>
+        )}
       </div>
 
       <div className="relative mt-4">
@@ -76,7 +85,10 @@ export function AccountCard({ account }: { account: Account }) {
       <div className="relative mt-5 flex items-center justify-between border-t border-white/10 pt-4">
         <p className="font-display text-xl font-bold">₦{account.price.toLocaleString()}</p>
         <Button 
-          onClick={handleCheckout} 
+          onClick={(e) => {
+            e.stopPropagation();
+            handleCheckout();
+          }} 
           disabled={loading}
           className="rounded-full bg-gradient-to-r from-primary to-chart-4 px-5 font-semibold text-primary-foreground hover:opacity-90"
         >
