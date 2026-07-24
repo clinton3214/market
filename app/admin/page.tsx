@@ -175,8 +175,11 @@ export default function AdminDashboard() {
 
           <div className="mt-4 flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 shadow-[0_16px_40px_-24px_rgba(0,0,0,0.8)] backdrop-blur-xl sm:px-6">
             <div className="flex items-center gap-2">
-              <TravisPayLogo className="h-8 w-auto" isDark={true} />
-              <span className="text-sm font-bold tracking-widest text-muted-foreground uppercase ml-2">Admin</span>
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5">
+                <TravisPayLogo className="h-6 w-auto" />
+              </span>
+              <span className="text-lg font-bold tracking-tight text-foreground">Travis Pay</span>
+              <span className="text-sm font-bold tracking-widest text-muted-foreground uppercase ml-1">Admin</span>
             </div>
 
             <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
