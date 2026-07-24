@@ -168,48 +168,49 @@ export default function AdminDashboard() {
   return (
     <main className="min-h-screen bg-background">
       {/* Floating Header */}
-      <header className="fixed top-4 inset-x-0 z-50 mx-auto w-full max-w-6xl px-4">
-        <div className="flex items-center justify-between gap-4 rounded-full border border-white/10 bg-card/40 px-4 py-2.5 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.6)] backdrop-blur-xl sm:px-6">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary to-chart-4 text-primary-foreground">
-              <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10 0a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm3.5 10.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z" />
-              </svg>
+      <header className="fixed inset-x-0 top-0 z-50">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mt-4 flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 shadow-[0_16px_40px_-24px_rgba(0,0,0,0.8)] backdrop-blur-xl sm:px-6">
+            <div className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg gradient-accent">
+                <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10 0a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm3.5 10.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z" />
+                </svg>
+              </span>
+              <span className="text-lg font-bold tracking-tight text-foreground">Travis Pay Admin</span>
             </div>
-            <span className="font-display text-lg font-bold tracking-tight text-foreground">Travis Pay Admin</span>
+
+            <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
+              <button onClick={handleLogout} className="rounded-lg px-3 py-2 text-sm font-medium text-destructive hover:text-destructive/80 transition">Logout</button>
+            </nav>
+
+            <button
+              type="button"
+              onClick={() => setIsHeaderExpanded((v) => !v)}
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-foreground md:hidden"
+              aria-label="Toggle menu"
+              aria-expanded={isHeaderExpanded}
+            >
+              {isHeaderExpanded ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
 
-          <nav className="hidden items-center gap-7 lg:flex" aria-label="Primary">
-            <button onClick={handleLogout} className="text-sm font-medium text-destructive hover:text-destructive/80 transition">Logout</button>
-          </nav>
-
-          <button
-            type="button"
-            onClick={() => setIsHeaderExpanded((v) => !v)}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-foreground lg:hidden"
-            aria-label="Toggle menu"
-            aria-expanded={isHeaderExpanded}
-          >
-            {isHeaderExpanded ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
+          {isHeaderExpanded && (
+            <div className="mt-2 rounded-2xl border border-border bg-background/80 p-4 backdrop-blur-xl md:hidden">
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => {
+                    setIsHeaderExpanded(false);
+                    handleLogout();
+                  }}
+                  className="rounded-xl px-4 py-2.5 text-left text-sm font-medium text-destructive transition-colors hover:bg-secondary"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-
-        {isHeaderExpanded ? (
-          <nav
-            className="mt-2 flex flex-col gap-1 rounded-3xl border border-white/10 bg-card/60 p-3 backdrop-blur-xl lg:hidden"
-            aria-label="Mobile"
-          >
-            <button
-              onClick={() => {
-                setIsHeaderExpanded(false);
-                handleLogout();
-              }}
-              className="rounded-xl px-4 py-2.5 text-left text-sm font-medium text-destructive transition-colors hover:bg-secondary"
-            >
-              Logout
-            </button>
-          </nav>
-        ) : null}
       </header>
 
       {/* Main Content */}
