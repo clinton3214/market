@@ -3,9 +3,10 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Menu, X, ShieldCheck } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/components/auth-provider'
+import { TravisPayLogo } from '@/components/travis-pay-logo'
 
 const links = [
   { label: 'Instagram', href: '#categories' },
@@ -32,10 +33,7 @@ export function Navbar() {
         <nav className="mt-4 flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 shadow-[0_16px_40px_-24px_rgba(0,0,0,0.8)] backdrop-blur-xl sm:px-6">
           {/* Logo */}
           <a href="#" className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg gradient-accent">
-              <ShieldCheck className="h-5 w-5 text-white" />
-            </span>
-            <span className="text-lg font-bold tracking-tight">Travis Pay</span>
+            <TravisPayLogo className="h-8 w-auto" isDark={true} />
           </a>
 
           {/* Center links */}

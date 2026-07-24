@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Menu, X, ArrowUpRight, Edit2, Trash2, Eye, EyeOff } from 'lucide-react';
+import { TravisPayLogo } from '@/components/travis-pay-logo';
 
 type Account = {
   id: string;
@@ -170,14 +172,11 @@ export default function AdminDashboard() {
       {/* Floating Header */}
       <header className="fixed inset-x-0 top-0 z-50">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
           <div className="mt-4 flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 shadow-[0_16px_40px_-24px_rgba(0,0,0,0.8)] backdrop-blur-xl sm:px-6">
             <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg gradient-accent">
-                <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10 0a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm3.5 10.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z" />
-                </svg>
-              </span>
-              <span className="text-lg font-bold tracking-tight text-foreground">Travis Pay Admin</span>
+              <TravisPayLogo className="h-8 w-auto" isDark={true} />
+              <span className="text-sm font-bold tracking-widest text-muted-foreground uppercase ml-2">Admin</span>
             </div>
 
             <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
