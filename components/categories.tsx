@@ -1,5 +1,9 @@
+'use client'
+
 import { ArrowUpRight } from 'lucide-react'
 import { InstagramIcon, FacebookIcon, XIcon } from '@/components/brand-icons'
+import { useAuth } from '@/components/auth-provider'
+import { useRouter } from 'next/navigation'
 
 const categories = [
   {
@@ -26,6 +30,18 @@ const categories = [
 ]
 
 export function Categories() {
+  const { user } = useAuth()
+  const router = useRouter()
+
+  const handleCategoryClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault()
+    if (!user) {
+      router.push('/login')
+    } else {
+      router.push(href)
+    }
+  }
+
   return (
     <section id="categories" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="mb-10 text-center">
@@ -42,6 +58,7 @@ export function Categories() {
           <a
             key={cat.name}
             href="/accounts"
+            onClick={(e) => handleCategoryClick(e, '/accounts')}
             className={`group glass-card flex flex-col justify-between rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 ${cat.glow}`}
           >
             <div className="flex items-start justify-between">

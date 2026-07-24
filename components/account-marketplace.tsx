@@ -50,7 +50,7 @@ export function AccountMarketplace() {
         a.category?.toLowerCase().includes(q)
       return matchPlatform && matchQuery
     })
-  }, [active, query])
+  }, [active, query, accounts])
 
   const counts = useMemo(() => {
     const c: Record<Filter, number> = { all: accounts.length, instagram: 0, facebook: 0, x: 0, telegram: 0 }
