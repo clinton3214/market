@@ -63,7 +63,7 @@ export default function Page() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-8">
+          <nav className="hidden lg:flex items-center gap-6">
             <a href="#" className="text-muted-foreground hover:text-foreground transition">
               Instagram
             </a>
@@ -76,9 +76,20 @@ export default function Page() {
             <a href="#" className="text-muted-foreground hover:text-foreground transition">
               How it Works
             </a>
-            <a href="/support" className="text-muted-foreground hover:text-foreground transition">
-              Support
+            
+            {/* Floating Support Chat Notification Bell */}
+            <a
+              href="/support"
+              className="relative flex items-center gap-2.5 bg-slate-900/80 hover:bg-slate-800 border border-purple-500/30 hover:border-purple-400/60 rounded-full px-4 py-2 text-foreground transition-all duration-300 shadow-lg shadow-purple-950/40 group"
+              title="Support Desk"
+            >
+              <svg className="w-5 h-5 text-purple-400 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              <span className="font-bold text-white text-sm">Support</span>
+              <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 animate-pulse absolute -top-1 -right-1 shadow-md shadow-purple-500/50" />
             </a>
+
             <button className="text-destructive hover:text-destructive/80 transition">Logout</button>
           </nav>
 

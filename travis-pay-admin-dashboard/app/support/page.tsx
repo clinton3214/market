@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Send, Search, User, MessageSquare, Clock, RefreshCw, CheckCircle2, Shield } from 'lucide-react';
+import { Send, Paperclip, Smile, Search, User, MessageSquare, Clock, RefreshCw, CheckCircle2, Shield, LogOut } from 'lucide-react';
 import { MAIN_APP_API_URL } from '@/lib/constants';
 
 interface Conversation {
@@ -47,7 +47,6 @@ export default function AdminSupportPage() {
       const data = await res.json();
       if (data.conversations) {
         setConversations(data.conversations);
-        // Default to first conversation if none selected yet
         if (!activeConversationId && data.conversations.length > 0) {
           setActiveConversationId(data.conversations[0].id);
         }
@@ -105,6 +104,10 @@ export default function AdminSupportPage() {
     scrollToBottom();
   }, [messages]);
 
+  const handleLogout = () => {
+    window.location.href = '/';
+  };
+
   const handleSendReply = async () => {
     if (!replyText.trim() || !activeConversationId || sendingReply) return;
 
@@ -158,29 +161,28 @@ export default function AdminSupportPage() {
 
   return (
     <main className="min-h-screen bg-background text-foreground pt-20 pb-8 px-4 flex flex-col font-sans">
-      {/* Top Floating Header */}
+      {/* Clean Header - Title & Logout only */}
       <header className="fixed top-4 left-0 right-0 z-50 px-4">
-        <div className="max-w-7xl mx-auto glass-header glass-shine rounded-full py-3 px-6 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto glass-header glass-shine rounded-full py-3 px-6 flex items-center justify-between shadow-2xl">
           <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="p-2 rounded-full bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground transition"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </Link>
-            <div className="w-8 h-8 bg-gradient-to-br from-travis-purple to-travis-purple-dark rounded-full flex items-center justify-center">
-              <Shield className="w-4 h-4 text-white" />
-            </div>
-            <div>
-              <span className="text-white font-semibold text-base">Travis Pay Admin</span>
-              <span className="ml-2 text-xs bg-travis-purple/20 text-travis-purple border border-travis-purple/30 px-2.5 py-0.5 rounded-full font-medium">
-                Support Desk
+            <Link href="/" className="flex items-center gap-2.5">
+              <div className="w-8 h-8 bg-gradient-to-br from-travis-purple to-travis-purple-dark rounded-full flex items-center justify-center shadow-lg shadow-travis-purple/30">
+                <Shield className="w-4 h-4 text-white" />
+              </div>
+              <span className="text-white font-bold text-base">Travis Pay Admin</span>
+              <span className="ml-1 text-xs bg-travis-purple/20 text-travis-purple border border-travis-purple/30 px-2.5 py-0.5 rounded-full font-medium">
+                Support Workspace
               </span>
-            </div>
+            </Link>
           </div>
-          <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition">
-            Back to Dashboard
-          </Link>
+
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 text-destructive hover:text-destructive/80 bg-destructive/10 hover:bg-destructive/20 border border-destructive/20 rounded-full px-4 py-2 text-sm font-semibold transition"
+          >
+            <LogOut className="w-4 h-4" />
+            Logout
+          </button>
         </div>
       </header>
 
@@ -336,23 +338,39 @@ export default function AdminSupportPage() {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Reply Box */}
-              <div className="mt-4 pt-3 border-t border-border flex gap-2">
-                <input
-                  type="text"
-                  value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Write an admin reply..."
-                  className="flex-1 bg-secondary border border-border rounded-xl px-4 py-2.5 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-travis-purple"
-                />
-                <button
-                  onClick={handleSendReply}
-                  disabled={!replyText.trim() || sendingReply}
-                  className="bg-gradient-to-r from-travis-purple to-travis-purple-dark text-white px-5 py-2.5 rounded-xl font-semibold hover:shadow-lg hover:shadow-travis-purple/30 disabled:opacity-50 transition flex items-center justify-center gap-2"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
+              {/* Floating Pill Glass Input matching design screenshot */}
+              <div className="mt-4 pt-2">
+                <div className="relative flex items-center gap-3 bg-gradient-to-r from-purple-950/60 via-slate-900/90 to-purple-950/60 border border-purple-500/30 rounded-full p-2 px-5 shadow-[0_10px_30px_rgba(147,51,234,0.15)] transition-all focus-within:border-purple-400/60 focus-within:ring-2 focus-within:ring-purple-500/20">
+                  
+                  {/* Attachment Icon */}
+                  <button type="button" className="text-muted-foreground hover:text-travis-purple transition-colors p-1">
+                    <Paperclip className="w-4 h-4" />
+                  </button>
+
+                  {/* Emoji Icon */}
+                  <button type="button" className="text-muted-foreground hover:text-travis-purple transition-colors p-1">
+                    <Smile className="w-4 h-4" />
+                  </button>
+
+                  {/* Capsule Input Field */}
+                  <input
+                    type="text"
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Type your message..."
+                    className="flex-1 bg-slate-900/60 border border-white/10 rounded-full px-5 py-2.5 text-sm text-foreground placeholder-muted-foreground focus:outline-none focus:border-travis-purple/40 transition-all"
+                  />
+
+                  {/* Circular Gradient Send Button */}
+                  <button
+                    onClick={handleSendReply}
+                    disabled={!replyText.trim() || sendingReply}
+                    className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 via-travis-purple to-travis-purple-dark hover:opacity-90 disabled:opacity-40 text-white flex items-center justify-center transition-all duration-300 shadow-lg shadow-travis-purple/40 shrink-0"
+                  >
+                    <Send className="w-4 h-4 translate-x-0.5" />
+                  </button>
+                </div>
               </div>
             </>
           ) : (
