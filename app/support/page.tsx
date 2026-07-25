@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { Send, Paperclip, Smile, User, CheckCircle2, RefreshCw, LogOut } from 'lucide-react'
+import { Send, Paperclip, Smile, User, CheckCircle2, RefreshCw, LogOut, Menu, X } from 'lucide-react'
 import { TravisPayLogo } from '@/components/travis-pay-logo'
 
 interface Message {
@@ -21,6 +21,7 @@ export default function SupportPage() {
   const [inputValue, setInputValue] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(true)
   const [sending, setSending] = useState<boolean>(false)
+  const [openMenu, setOpenMenu] = useState<boolean>(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Initialize or retrieve Session ID and Email
@@ -148,21 +149,46 @@ export default function SupportPage() {
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-purple-500/30">
       {/* Clean Header - Only Logo & Logout */}
       <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4">
-        <div className="mx-auto max-w-5xl flex items-center justify-between rounded-2xl border border-white/10 bg-slate-900/60 px-6 py-3 shadow-[0_16px_40px_-24px_rgba(0,0,0,0.8)] backdrop-blur-xl">
-          <Link href="/" className="flex items-center gap-2.5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 border border-white/10">
-              <TravisPayLogo className="h-6 w-auto" />
-            </span>
-            <span className="text-lg font-bold tracking-tight text-white">Travis Pay Support</span>
-          </Link>
+        <div className="mx-auto max-w-5xl">
+          <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 shadow-[0_16px_40px_-24px_rgba(0,0,0,0.8)] backdrop-blur-xl sm:px-6">
+            <Link href="/" className="flex items-center gap-2.5">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 border border-white/10">
+                <TravisPayLogo className="h-6 w-auto" />
+              </span>
+              <span className="text-lg font-bold tracking-tight text-white">Travis Pay Support</span>
+            </Link>
 
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-xl px-4 py-2 text-sm font-semibold transition-all"
-          >
-            <LogOut size={16} />
-            Logout
-          </button>
+            {/* Desktop Logout Button */}
+            <button
+              onClick={handleLogout}
+              className="hidden md:flex items-center gap-2 text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-xl px-4 py-2 text-sm font-semibold transition-all"
+            >
+              <LogOut size={16} />
+              Logout
+            </button>
+
+            {/* Mobile Menu Toggle */}
+            <button
+              type="button"
+              onClick={() => setOpenMenu((v) => !v)}
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 text-white md:hidden"
+            >
+              {openMenu ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
+
+          {/* Mobile Menu Content */}
+          {openMenu && (
+            <div className="mt-2 rounded-2xl border border-white/10 bg-slate-900/80 p-4 backdrop-blur-xl md:hidden flex flex-col gap-2 shadow-2xl">
+              <button
+                onClick={handleLogout}
+                className="flex w-full justify-center items-center gap-2 text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-xl px-4 py-3 text-sm font-semibold transition-all"
+              >
+                <LogOut size={16} />
+                Logout
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
@@ -252,16 +278,16 @@ export default function SupportPage() {
           </div>
 
           {/* Floating Pill Glass Input matching design screenshot */}
-          <div className="p-4 bg-slate-950/70 backdrop-blur-md">
-            <div className="relative flex items-center gap-3 bg-gradient-to-r from-purple-950/60 via-slate-900/90 to-purple-950/60 border border-purple-500/30 rounded-full p-2 px-5 shadow-[0_10px_30px_rgba(147,51,234,0.15)] transition-all focus-within:border-purple-400/60 focus-within:ring-2 focus-within:ring-purple-500/20">
+          <div className="p-2 sm:p-4 bg-slate-950/70 backdrop-blur-md">
+            <div className="relative flex items-center gap-2 sm:gap-3 bg-gradient-to-r from-purple-950/60 via-slate-900/90 to-purple-950/60 border border-purple-500/30 rounded-full p-1.5 sm:p-2 px-3 sm:px-5 shadow-[0_10px_30px_rgba(147,51,234,0.15)] transition-all focus-within:border-purple-400/60 focus-within:ring-2 focus-within:ring-purple-500/20">
               
               {/* Attachment Icon */}
-              <button type="button" className="text-slate-400 hover:text-purple-300 transition-colors p-1">
+              <button type="button" className="hidden sm:block text-slate-400 hover:text-purple-300 transition-colors p-1 shrink-0">
                 <Paperclip size={18} />
               </button>
 
               {/* Emoji Icon */}
-              <button type="button" className="text-slate-400 hover:text-purple-300 transition-colors p-1">
+              <button type="button" className="hidden sm:block text-slate-400 hover:text-purple-300 transition-colors p-1 shrink-0">
                 <Smile size={18} />
               </button>
 
@@ -272,16 +298,17 @@ export default function SupportPage() {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyPress}
                 placeholder="Type your message..."
-                className="flex-1 bg-slate-900/60 border border-white/10 rounded-full px-5 py-2.5 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-purple-400/40 transition-all"
+                className="flex-1 min-w-0 bg-slate-900/60 border border-white/10 rounded-full px-4 py-2 sm:px-5 sm:py-2.5 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-purple-400/40 transition-all"
               />
 
               {/* Circular Gradient Send Button */}
               <button
                 onClick={handleSendMessage}
                 disabled={!inputValue.trim() || sending}
-                className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 via-purple-600 to-purple-700 hover:opacity-90 disabled:opacity-40 text-white flex items-center justify-center transition-all duration-300 shadow-lg shadow-purple-500/40 shrink-0"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-blue-500 via-purple-600 to-purple-700 hover:opacity-90 disabled:opacity-40 text-white flex items-center justify-center transition-all duration-300 shadow-lg shadow-purple-500/40 shrink-0"
               >
-                <Send size={18} className="translate-x-0.5" />
+                <Send size={16} className="translate-x-0.5 sm:hidden" />
+                <Send size={18} className="translate-x-0.5 hidden sm:block" />
               </button>
             </div>
           </div>

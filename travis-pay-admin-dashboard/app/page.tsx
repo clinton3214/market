@@ -1,13 +1,51 @@
 'use client';
 
-import { useState } from 'react';
-import { Menu, X, ArrowUpRight, Edit2, Trash2, Eye, EyeOff } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Menu, X, ArrowUpRight, Edit2, Trash2, Eye, EyeOff, MessageSquare, XCircle } from 'lucide-react';
 
 export default function Page() {
   const [isHeaderExpanded, setIsHeaderExpanded] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [activeFilter, setActiveFilter] = useState('all');
   const [showPassword, setShowPassword] = useState<Record<string, boolean>>({});
+  const [notifications, setNotifications] = useState<any[]>([]);
+
+  useEffect(() => {
+    let lastChecked = Date.now();
+    const fetchMessages = async () => {
+      try {
+        const MAIN_APP_API_URL = process.env.NEXT_PUBLIC_MAIN_APP_URL || 'http://localhost:3000';
+        const response = await fetch(`${MAIN_APP_API_URL}/api/admin/support`);
+        if (!response.ok) return;
+        const data = await response.json();
+        
+        if (data.conversations) {
+          let newNotifs: any[] = [];
+          data.conversations.forEach((conv: any) => {
+            const msgTime = new Date(conv.lastMessageAt || conv.createdAt).getTime();
+            // If message is newer than lastChecked and sent by user
+            if (msgTime > lastChecked && conv.lastMessageSender !== 'admin') {
+              newNotifs.push({
+                id: 'notif_' + Math.random(),
+                email: conv.userEmail || 'User',
+                text: conv.lastMessageText || 'New message received',
+              });
+            }
+          });
+          
+          if (newNotifs.length > 0) {
+            setNotifications(prev => [...prev, ...newNotifs]);
+            lastChecked = Date.now();
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch admin support:', err);
+      }
+    };
+    
+    const interval = setInterval(fetchMessages, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   const togglePassword = (id: string) => {
     setShowPassword((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -348,6 +386,25 @@ export default function Page() {
           </div>
         </div>
       )}
+
+      {/* Floating Notifications */}
+      <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-3">
+        {notifications.map((notif) => (
+          <div key={notif.id} className="glass-effect glass-shine border border-purple-500/30 rounded-2xl p-4 shadow-[0_10px_30px_rgba(147,51,234,0.2)] flex items-start gap-4 animate-in slide-in-from-right-8 fade-in max-w-sm backdrop-blur-xl bg-slate-900/80">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center shrink-0 shadow-lg shadow-purple-500/30">
+              <MessageSquare className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1">
+              <h4 className="text-white font-semibold text-sm mb-1">New Message from {notif.email}</h4>
+              <p className="text-slate-300 text-xs line-clamp-2">{notif.text}</p>
+              <a href="/support" className="text-[10px] text-purple-400 hover:text-purple-300 mt-2 inline-block font-medium">View Conversation &rarr;</a>
+            </div>
+            <button onClick={() => setNotifications(prev => prev.filter(n => n.id !== notif.id))} className="text-slate-400 hover:text-white transition-colors shrink-0">
+              <XCircle className="w-5 h-5" />
+            </button>
+          </div>
+        ))}
+      </div>
     </main>
   );
 }
