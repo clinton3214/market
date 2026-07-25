@@ -139,9 +139,9 @@ export default function SupportPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-purple-500/30">
-      {/* Clean Header - Only Logo & Logout */}
-      <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4">
+    <div className="h-[100dvh] bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-purple-500/30 overflow-hidden">
+      {/* Clean Header - Sticky so it stays visible when mobile keyboard opens */}
+      <header className="shrink-0 px-4 pt-4 pb-2 z-50">
         <div className="mx-auto max-w-5xl">
           <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 shadow-[0_16px_40px_-24px_rgba(0,0,0,0.8)] backdrop-blur-xl sm:px-6">
             <Link href="/" className="flex items-center gap-2.5">
@@ -183,7 +183,7 @@ export default function SupportPage() {
         </div>
       </header>
 
-      <main className="flex-1 w-full mx-auto px-4 pt-24 pb-28 flex flex-col max-w-4xl">
+      <main className="flex-1 w-full mx-auto px-4 pt-4 pb-4 flex flex-col max-w-4xl overflow-hidden min-h-0">
         {/* Support Banner Info */}
         <div className="flex items-center justify-between mb-6 px-2">
           <div className="flex items-center gap-3">
@@ -212,7 +212,7 @@ export default function SupportPage() {
         </div>
 
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto space-y-4 px-2 no-scrollbar">
+        <div className="flex-1 overflow-y-auto space-y-4 px-2 no-scrollbar min-h-0">
             {loading ? (
               <div className="h-full flex items-center justify-center text-slate-400 text-sm gap-2">
                 <RefreshCw size={18} className="animate-spin text-purple-400" />
@@ -271,9 +271,9 @@ export default function SupportPage() {
         </div>
       </main>
 
-      {/* Floating Pill Glass Input matching design screenshot */}
-      <div className="fixed bottom-6 inset-x-0 px-4 pointer-events-none z-40">
-        <div className="max-w-4xl mx-auto pointer-events-auto">
+      {/* Floating Pill Glass Input - stays at bottom of flex layout, never moves */}
+      <div className="shrink-0 px-4 pb-4 pt-2 z-40">
+        <div className="max-w-4xl mx-auto">
           <div className="relative flex items-center gap-2 sm:gap-3 bg-slate-900/80 backdrop-blur-xl border border-white/10 rounded-full p-2 px-3 sm:px-5 shadow-[0_16px_40px_-24px_rgba(0,0,0,0.8)] transition-all focus-within:border-purple-400/60 focus-within:ring-2 focus-within:ring-purple-500/20">
             
             {/* Attachment Icon */}

@@ -125,17 +125,19 @@ export default function Page() {
           </nav>
 
           <div className="flex items-center gap-3">
-            {/* Floating Support Chat Notification Bell with Dropdown (Visible on all screens) */}
+            {/* Support Chat Button - Always Visible */}
             <div className="relative">
               <button
                 onClick={() => setIsSupportOpen(!isSupportOpen)}
-                className="relative flex items-center gap-2 bg-slate-900/80 hover:bg-slate-800 border border-purple-500/30 hover:border-purple-400/60 rounded-full px-3 py-1.5 lg:px-4 lg:py-2 text-foreground transition-all duration-300 shadow-lg shadow-purple-950/40 group"
-                title="Support Desk"
+                className="relative flex items-center gap-2 bg-gradient-to-r from-travis-purple to-travis-purple-dark hover:opacity-90 border border-purple-400/40 rounded-full px-3 py-1.5 lg:px-4 lg:py-2 text-white transition-all duration-300 shadow-lg shadow-travis-purple/40 group"
+                title="Support Chat"
               >
-                <MessageSquare className="w-4 h-4 lg:w-5 lg:h-5 text-purple-400 group-hover:scale-110 transition-transform" />
-                <span className="font-bold text-white text-xs lg:text-sm hidden sm:inline-block">Support</span>
-                {notifications.length > 0 && (
-                  <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 animate-pulse absolute -top-1 -right-1 shadow-md shadow-purple-500/50" />
+                <MessageSquare className="w-4 h-4 lg:w-5 lg:h-5 text-white group-hover:scale-110 transition-transform" />
+                <span className="font-bold text-white text-xs lg:text-sm">Chat</span>
+                {conversations.length > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold shadow-md animate-pulse">
+                    {conversations.reduce((sum: number, c: any) => sum + (c.unreadCountAdmin || 0), 0) || conversations.length}
+                  </span>
                 )}
               </button>
 
@@ -198,8 +200,9 @@ export default function Page() {
               <a href="#" className="text-muted-foreground hover:text-foreground transition py-2">
                 How it Works
               </a>
-              <a href="/support" className="text-muted-foreground hover:text-foreground transition py-2">
-                Support
+              <a href="/support" className="text-muted-foreground hover:text-foreground transition py-2 flex items-center gap-2">
+                <MessageSquare className="w-4 h-4 text-purple-400" />
+                Support Chat
               </a>
               <button className="text-destructive hover:text-destructive/80 transition py-2 text-left">Logout</button>
             </nav>
