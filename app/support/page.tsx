@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { Send, Paperclip, Smile, User, CheckCircle2, RefreshCw, LogOut, Menu, X } from 'lucide-react'
+import { Send, Paperclip, Smile, User, CheckCircle2, RefreshCw, LogOut, Menu, X, ShieldAlert } from 'lucide-react'
 import { TravisPayLogo } from '@/components/travis-pay-logo'
 
 interface Message {
@@ -13,10 +13,7 @@ interface Message {
 }
 
 export default function SupportPage() {
-  const [sessionId, setSessionId] = useState<string>('')
-  const [userEmail, setUserEmail] = useState<string>('')
-  const [emailInput, setEmailInput] = useState<string>('')
-  const [showEmailModal, setShowEmailModal] = useState<boolean>(false)
+  const [user, setUser] = useState<any>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [inputValue, setInputValue] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(true)
@@ -24,17 +21,22 @@ export default function SupportPage() {
   const [openMenu, setOpenMenu] = useState<boolean>(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // Initialize or retrieve Session ID and Email
+  // Fetch auth user
   useEffect(() => {
-    let existingSession = localStorage.getItem('tp_support_session_id')
-    if (!existingSession) {
-      existingSession = 'sess_' + Math.random().toString(36).substring(2) + Date.now().toString(36)
-      localStorage.setItem('tp_support_session_id', existingSession)
+    const fetchUser = async () => {
+      try {
+        const res = await fetch('/api/auth/me')
+        const data = await res.json()
+        if (data.user) {
+          setUser(data.user)
+        } else {
+          setLoading(false)
+        }
+      } catch (err) {
+        setLoading(false)
+      }
     }
-    setSessionId(existingSession)
-
-    const savedEmail = localStorage.getItem('tp_support_email') || ''
-    setUserEmail(savedEmail)
+    fetchUser()
   }, [])
 
   const scrollToBottom = () => {
@@ -43,9 +45,15 @@ export default function SupportPage() {
 
   // Fetch messages from backend API
   const fetchMessages = useCallback(async () => {
-    if (!sessionId) return
+    if (!user) return
     try {
-      const res = await fetch(`/api/support?sessionId=${sessionId}`)
+      const res = await fetch(`/api/support`)
+      if (!res.ok) {
+         if (res.status === 401) {
+            setUser(null)
+         }
+         return
+      }
       const data = await res.json()
 
       if (data.messages) {
@@ -58,24 +66,20 @@ export default function SupportPage() {
           }))
         )
       }
-      if (data.conversation?.userEmail && !userEmail) {
-        setUserEmail(data.conversation.userEmail)
-        localStorage.setItem('tp_support_email', data.conversation.userEmail)
-      }
     } catch (err) {
       console.error('Failed to fetch support messages:', err)
     } finally {
       setLoading(false)
     }
-  }, [sessionId, userEmail])
+  }, [user])
 
   // Initial fetch and 3s polling
   useEffect(() => {
-    if (!sessionId) return
+    if (!user) return
     fetchMessages()
     const interval = setInterval(fetchMessages, 3000)
     return () => clearInterval(interval)
-  }, [sessionId, fetchMessages])
+  }, [user, fetchMessages])
 
   useEffect(() => {
     scrollToBottom()
@@ -87,22 +91,13 @@ export default function SupportPage() {
     } catch (err) {
       // Ignore
     }
-    localStorage.removeItem('tp_support_session_id')
-    localStorage.removeItem('tp_support_email')
     window.location.href = '/'
   }
 
-  const handleSaveEmail = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (emailInput.trim()) {
-      setUserEmail(emailInput.trim())
-      localStorage.setItem('tp_support_email', emailInput.trim())
-      setShowEmailModal(false)
-    }
-  }
+
 
   const handleSendMessage = async () => {
-    if (!inputValue.trim() || !sessionId || sending) return
+    if (!inputValue.trim() || !user || sending) return
 
     const textToSend = inputValue.trim()
     setInputValue('')
@@ -122,8 +117,6 @@ export default function SupportPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          sessionId,
-          userEmail,
           text: textToSend,
         }),
       })
@@ -206,39 +199,44 @@ export default function SupportPage() {
                 </span>
               </h2>
               <p className="text-slate-400 text-xs">
-                {userEmail ? (
+                {user ? (
                   <span className="flex items-center gap-1 text-slate-300">
-                    <User size={12} /> {userEmail}
+                    <User size={12} /> {user.email}
                   </span>
                 ) : (
-                  'Ask us anything about your social account purchases'
+                  'Please log in to contact support'
                 )}
               </p>
             </div>
           </div>
-
-          <button
-            onClick={() => setShowEmailModal(true)}
-            className="text-xs px-3 py-1.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-all flex items-center gap-1.5"
-          >
-            <User size={14} />
-            {userEmail ? 'Edit Email' : 'Add Email'}
-          </button>
         </div>
 
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto space-y-4 px-2 no-scrollbar">
-            {loading && messages.length === 0 ? (
+            {loading ? (
               <div className="h-full flex items-center justify-center text-slate-400 text-sm gap-2">
                 <RefreshCw size={18} className="animate-spin text-purple-400" />
                 Connecting to live support...
+              </div>
+            ) : !user ? (
+              <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400">
+                <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-3">
+                  <ShieldAlert size={24} className="text-red-400" />
+                </div>
+                <p className="font-semibold text-slate-200">Authentication Required</p>
+                <p className="text-xs text-slate-400 mt-1 max-w-sm mb-6">
+                  You must be logged in to contact our support team.
+                </p>
+                <Link href="/login" className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:opacity-90 transition-opacity">
+                  Log In to Continue
+                </Link>
               </div>
             ) : messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400">
                 <div className="w-12 h-12 rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-3">
                   <CheckCircle2 size={24} className="text-purple-400" />
                 </div>
-                <p className="font-semibold text-slate-200">How can we help you today?</p>
+                <p className="font-semibold text-slate-200">How can we help you today, {user.name?.split(' ')[0] || 'there'}?</p>
                 <p className="text-xs text-slate-400 mt-1 max-w-sm">
                   Send a message below and our support team will reply immediately.
                 </p>
@@ -301,7 +299,7 @@ export default function SupportPage() {
             {/* Circular Gradient Send Button */}
             <button
               onClick={handleSendMessage}
-              disabled={!inputValue.trim() || sending}
+              disabled={!inputValue.trim() || sending || !user}
               className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-blue-500 via-purple-600 to-purple-700 hover:opacity-90 disabled:opacity-40 text-white flex items-center justify-center transition-all duration-300 shadow-lg shadow-purple-500/40 shrink-0"
             >
               <Send size={16} className="translate-x-0.5 sm:hidden" />
@@ -311,42 +309,7 @@ export default function SupportPage() {
         </div>
       </div>
 
-      {/* Email Identification Modal */}
-      {showEmailModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-white/10 rounded-2xl max-w-md w-full p-6 shadow-2xl animate-in">
-            <h3 className="text-lg font-bold text-white mb-2">Identify Your Account</h3>
-            <p className="text-xs text-slate-400 mb-4">
-              Enter your email address so our support agents can find your account details and follow up.
-            </p>
-            <form onSubmit={handleSaveEmail} className="space-y-4">
-              <input
-                type="email"
-                required
-                value={emailInput}
-                onChange={(e) => setEmailInput(e.target.value)}
-                placeholder="name@example.com"
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-purple-500"
-              />
-              <div className="flex gap-2 justify-end">
-                <button
-                  type="button"
-                  onClick={() => setShowEmailModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-white bg-slate-800"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:opacity-90"
-                >
-                  Save Email
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+
     </div>
   )
 }

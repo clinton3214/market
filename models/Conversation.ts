@@ -2,10 +2,15 @@ import mongoose from 'mongoose';
 
 const ConversationSchema = new mongoose.Schema(
   {
-    sessionId: {
-      type: String,
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
       required: true,
       index: true,
+    },
+    sessionId: {
+      type: String,
+      required: false,
     },
     userEmail: {
       type: String,

@@ -119,15 +119,21 @@ export default function Page() {
               How it Works
             </a>
             
-            {/* Floating Support Chat Notification Bell with Dropdown */}
+
+
+            <button className="text-destructive hover:text-destructive/80 transition">Logout</button>
+          </nav>
+
+          <div className="flex items-center gap-3">
+            {/* Floating Support Chat Notification Bell with Dropdown (Visible on all screens) */}
             <div className="relative">
               <button
                 onClick={() => setIsSupportOpen(!isSupportOpen)}
-                className="relative flex items-center gap-2.5 bg-slate-900/80 hover:bg-slate-800 border border-purple-500/30 hover:border-purple-400/60 rounded-full px-4 py-2 text-foreground transition-all duration-300 shadow-lg shadow-purple-950/40 group"
+                className="relative flex items-center gap-2 bg-slate-900/80 hover:bg-slate-800 border border-purple-500/30 hover:border-purple-400/60 rounded-full px-3 py-1.5 lg:px-4 lg:py-2 text-foreground transition-all duration-300 shadow-lg shadow-purple-950/40 group"
                 title="Support Desk"
               >
-                <MessageSquare className="w-5 h-5 text-purple-400 group-hover:scale-110 transition-transform" />
-                <span className="font-bold text-white text-sm">Support</span>
+                <MessageSquare className="w-4 h-4 lg:w-5 lg:h-5 text-purple-400 group-hover:scale-110 transition-transform" />
+                <span className="font-bold text-white text-xs lg:text-sm hidden sm:inline-block">Support</span>
                 {notifications.length > 0 && (
                   <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 animate-pulse absolute -top-1 -right-1 shadow-md shadow-purple-500/50" />
                 )}
@@ -135,7 +141,7 @@ export default function Page() {
 
               {/* Chat Dropdown Menu */}
               {isSupportOpen && (
-                <div className="absolute top-full right-0 mt-4 w-80 glass-effect glass-shine rounded-2xl border border-purple-500/30 shadow-2xl p-4 animate-in slide-in-from-top-2 fade-in">
+                <div className="absolute top-full right-0 mt-4 w-[280px] sm:w-80 glass-effect glass-shine rounded-2xl border border-purple-500/30 shadow-2xl p-4 animate-in slide-in-from-top-2 fade-in">
                   <div className="flex items-center justify-between mb-3 border-b border-white/10 pb-2">
                     <h4 className="text-white font-semibold text-sm">Recent Chats</h4>
                     <span className="text-[10px] bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full font-medium">{conversations.length} Active</span>
@@ -148,7 +154,7 @@ export default function Page() {
                       conversations.slice(0, 5).map((conv: any) => (
                         <div key={conv.id} className="bg-slate-900/60 rounded-xl p-3 border border-white/5 hover:border-purple-500/30 transition-colors">
                           <div className="flex justify-between items-start mb-1">
-                            <h5 className="text-xs font-semibold text-white truncate max-w-[150px]">{conv.userEmail || conv.userName || 'Guest User'}</h5>
+                            <h5 className="text-xs font-semibold text-white truncate max-w-[130px]">{conv.userEmail || conv.userName || 'Guest User'}</h5>
                             <span className="text-[10px] text-muted-foreground">
                               {new Date(conv.lastMessageAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </span>
@@ -166,16 +172,14 @@ export default function Page() {
               )}
             </div>
 
-            <button className="text-destructive hover:text-destructive/80 transition">Logout</button>
-          </nav>
-
-          {/* Mobile Menu Toggle */}
-          <button
-            onClick={() => setIsHeaderExpanded(!isHeaderExpanded)}
-            className="lg:hidden text-foreground hover:text-muted-foreground transition"
-          >
-            {isHeaderExpanded ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+            {/* Mobile Menu Toggle */}
+            <button
+              onClick={() => setIsHeaderExpanded(!isHeaderExpanded)}
+              className="lg:hidden text-foreground hover:text-muted-foreground transition"
+            >
+              {isHeaderExpanded ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Menu */}
