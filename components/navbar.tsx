@@ -9,11 +9,11 @@ import { useAuth } from '@/components/auth-provider'
 import { TravisPayLogo } from '@/components/travis-pay-logo'
 
 const links = [
-  { label: 'Instagram', href: '#categories' },
-  { label: 'Facebook', href: '#categories' },
-  { label: 'X', href: '#categories' },
-  { label: 'How It Works', href: '#how-it-works' },
-  { label: 'Support', href: '#support' },
+  { label: 'Instagram', href: '/#categories' },
+  { label: 'Facebook', href: '/#categories' },
+  { label: 'X', href: '/#categories' },
+  { label: 'How It Works', href: '/#how-it-works' },
+  { label: 'Support', href: '/support' },
 ]
 
 export function Navbar() {

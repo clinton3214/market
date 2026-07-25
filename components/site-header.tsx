@@ -7,12 +7,12 @@ import { TravisPayLogo } from "@/components/travis-pay-logo"
 
 const navLinks = [
   { label: "Home", href: "/" },
-  { label: "Instagram", href: "#listings" },
-  { label: "Facebook", href: "#listings" },
-  { label: "X", href: "#listings" },
-  { label: "Telegram", href: "#listings" },
-  { label: "How It Works", href: "#listings" },
-  { label: "Support", href: "#listings" },
+  { label: "Instagram", href: "/#listings" },
+  { label: "Facebook", href: "/#listings" },
+  { label: "X", href: "/#listings" },
+  { label: "Telegram", href: "/#listings" },
+  { label: "How It Works", href: "/#listings" },
+  { label: "Support", href: "/support" },
 ]
 
 export function SiteHeader() {

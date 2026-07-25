@@ -76,7 +76,7 @@ export default function Page() {
             <a href="#" className="text-muted-foreground hover:text-foreground transition">
               How it Works
             </a>
-            <a href="#" className="text-muted-foreground hover:text-foreground transition">
+            <a href="/support" className="text-muted-foreground hover:text-foreground transition">
               Support
             </a>
             <button className="text-destructive hover:text-destructive/80 transition">Logout</button>
@@ -107,7 +107,7 @@ export default function Page() {
               <a href="#" className="text-muted-foreground hover:text-foreground transition py-2">
                 How it Works
               </a>
-              <a href="#" className="text-muted-foreground hover:text-foreground transition py-2">
+              <a href="/support" className="text-muted-foreground hover:text-foreground transition py-2">
                 Support
               </a>
               <button className="text-destructive hover:text-destructive/80 transition py-2 text-left">Logout</button>

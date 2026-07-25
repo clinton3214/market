@@ -2,11 +2,11 @@ import { ShieldCheck } from 'lucide-react'
 import { InstagramIcon, FacebookIcon, XIcon } from '@/components/brand-icons'
 
 const quickLinks = [
-  { label: 'Instagram', href: '#categories' },
-  { label: 'Facebook', href: '#categories' },
-  { label: 'X', href: '#categories' },
-  { label: 'How It Works', href: '#how-it-works' },
-  { label: 'Support', href: '#support' },
+  { label: 'Instagram', href: '/#categories' },
+  { label: 'Facebook', href: '/#categories' },
+  { label: 'X', href: '/#categories' },
+  { label: 'How It Works', href: '/#how-it-works' },
+  { label: 'Support', href: '/support' },
 ]
 
 const socials = [
