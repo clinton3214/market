@@ -20,6 +20,8 @@ export default function SupportPage() {
   const [sending, setSending] = useState<boolean>(false)
   const [openMenu, setOpenMenu] = useState<boolean>(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const prevMessageCountRef = useRef<number>(0)
+  const isInitialLoadRef = useRef<boolean>(true)
 
   // Fetch auth user
   useEffect(() => {
@@ -81,8 +83,20 @@ export default function SupportPage() {
     return () => clearInterval(interval)
   }, [user, fetchMessages])
 
+  // Only auto-scroll when a NEW message is actually added, not on every poll
   useEffect(() => {
-    scrollToBottom()
+    const currentCount = messages.length
+    if (currentCount > prevMessageCountRef.current) {
+      // New message was added — scroll to bottom
+      if (isInitialLoadRef.current) {
+        // On initial load, scroll instantly without animation
+        messagesEndRef.current?.scrollIntoView({ behavior: 'instant' })
+        isInitialLoadRef.current = false
+      } else {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+      }
+    }
+    prevMessageCountRef.current = currentCount
   }, [messages])
 
   const handleLogout = async () => {
@@ -139,8 +153,8 @@ export default function SupportPage() {
   }
 
   return (
-    <div className="h-[100dvh] bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-purple-500/30 overflow-hidden">
-      {/* Clean Header - Sticky so it stays visible when mobile keyboard opens */}
+    <div className="fixed inset-0 bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-purple-500/30">
+      {/* Header - part of flex flow, never moves */}
       <header className="shrink-0 px-4 pt-4 pb-2 z-50">
         <div className="mx-auto max-w-5xl">
           <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 shadow-[0_16px_40px_-24px_rgba(0,0,0,0.8)] backdrop-blur-xl sm:px-6">

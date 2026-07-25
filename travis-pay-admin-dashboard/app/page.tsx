@@ -94,7 +94,7 @@ export default function Page() {
     <main className="min-h-screen bg-background">
       {/* Floating Header */}
       <header className="fixed top-4 left-0 right-0 z-50 px-4">
-        <div className="max-w-7xl mx-auto glass-header glass-shine rounded-full py-3 px-6 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto glass-header rounded-2xl py-3 px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-gradient-to-br from-travis-purple to-travis-purple-dark rounded-full flex items-center justify-center">
               <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -118,61 +118,28 @@ export default function Page() {
             <a href="#" className="text-muted-foreground hover:text-foreground transition">
               How it Works
             </a>
-            
-
-
+            <a href="/support" className="text-purple-400 hover:text-purple-300 transition font-medium flex items-center gap-1.5">
+              <MessageSquare className="w-4 h-4" />
+              Support
+            </a>
             <button className="text-destructive hover:text-destructive/80 transition">Logout</button>
           </nav>
 
           <div className="flex items-center gap-3">
-            {/* Support Chat Button - Always Visible */}
-            <div className="relative">
-              <button
-                onClick={() => setIsSupportOpen(!isSupportOpen)}
-                className="relative flex items-center gap-2 bg-gradient-to-r from-travis-purple to-travis-purple-dark hover:opacity-90 border border-purple-400/40 rounded-full px-3 py-1.5 lg:px-4 lg:py-2 text-white transition-all duration-300 shadow-lg shadow-travis-purple/40 group"
-                title="Support Chat"
-              >
-                <MessageSquare className="w-4 h-4 lg:w-5 lg:h-5 text-white group-hover:scale-110 transition-transform" />
-                <span className="font-bold text-white text-xs lg:text-sm">Chat</span>
-                {conversations.length > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold shadow-md animate-pulse">
-                    {conversations.reduce((sum: number, c: any) => sum + (c.unreadCountAdmin || 0), 0) || conversations.length}
-                  </span>
-                )}
-              </button>
-
-              {/* Chat Dropdown Menu */}
-              {isSupportOpen && (
-                <div className="absolute top-full right-0 mt-4 w-[280px] sm:w-80 glass-effect glass-shine rounded-2xl border border-purple-500/30 shadow-2xl p-4 animate-in slide-in-from-top-2 fade-in">
-                  <div className="flex items-center justify-between mb-3 border-b border-white/10 pb-2">
-                    <h4 className="text-white font-semibold text-sm">Recent Chats</h4>
-                    <span className="text-[10px] bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full font-medium">{conversations.length} Active</span>
-                  </div>
-                  
-                  <div className="space-y-3 max-h-[300px] overflow-y-auto no-scrollbar">
-                    {conversations.length === 0 ? (
-                       <p className="text-xs text-muted-foreground text-center py-4">No active conversations.</p>
-                    ) : (
-                      conversations.slice(0, 5).map((conv: any) => (
-                        <div key={conv.id} className="bg-slate-900/60 rounded-xl p-3 border border-white/5 hover:border-purple-500/30 transition-colors">
-                          <div className="flex justify-between items-start mb-1">
-                            <h5 className="text-xs font-semibold text-white truncate max-w-[130px]">{conv.userEmail || conv.userName || 'Guest User'}</h5>
-                            <span className="text-[10px] text-muted-foreground">
-                              {new Date(conv.lastMessageAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-slate-300 line-clamp-2">{conv.lastMessageText || 'No messages yet'}</p>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                  
-                  <a href="/support" className="block w-full text-center mt-3 pt-3 border-t border-white/10 text-sm text-purple-400 hover:text-purple-300 font-medium">
-                    Open Chat Workspace &rarr;
-                  </a>
-                </div>
+            {/* Support Chat Button - Always Visible on ALL screens */}
+            <a
+              href="/support"
+              className="relative flex items-center gap-2 bg-gradient-to-r from-travis-purple to-travis-purple-dark hover:opacity-90 rounded-xl px-3 py-2 lg:px-4 lg:py-2 text-white transition-all duration-300 shadow-lg shadow-travis-purple/40"
+              title="Support Chat"
+            >
+              <MessageSquare className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
+              <span className="font-semibold text-white text-xs lg:text-sm">Chat</span>
+              {conversations.length > 0 && (
+                <span className="absolute -top-2 -right-2 min-w-[20px] h-[20px] flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold shadow-md animate-pulse border-2 border-background">
+                  {conversations.reduce((sum: number, c: any) => sum + (c.unreadCountAdmin || 0), 0) || conversations.length}
+                </span>
               )}
-            </div>
+            </a>
 
             {/* Mobile Menu Toggle */}
             <button
