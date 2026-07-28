@@ -25,7 +25,19 @@ export async function GET() {
       .sort({ lastMessageAt: -1 })
       .lean();
 
-    const formatted = conversations.map((conv: any) => ({
+    // Deduplicate by userId (since they are sorted by lastMessageAt desc, we keep the latest)
+    const seenUsers = new Set();
+    const deduplicatedConversations = [];
+    
+    for (const conv of conversations) {
+      const uId = conv.userId ? conv.userId.toString() : conv.sessionId;
+      if (!seenUsers.has(uId)) {
+        seenUsers.add(uId);
+        deduplicatedConversations.push(conv);
+      }
+    }
+
+    const formatted = deduplicatedConversations.map((conv: any) => ({
       ...conv,
       id: conv._id.toString(),
       _id: undefined,

@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { Send, Paperclip, Smile, Search, User, MessageSquare, Clock, RefreshCw, CheckCircle2, Shield, LogOut } from 'lucide-react';
+import { Send, Paperclip, Smile, Search, User, MessageSquare, Clock, RefreshCw, CheckCircle2, Shield, LogOut, Menu, X, ArrowLeft } from 'lucide-react';
+import { TravisPayLogo } from '@/components/travis-pay-logo';
 
 interface Conversation {
   id: string;
@@ -37,6 +38,10 @@ export default function AdminSupportPage() {
   const prevMessageCountRef = useRef<number>(0);
   const isInitialLoadRef = useRef<boolean>(true);
 
+  // Layout states for mobile
+  const [isHeaderExpanded, setIsHeaderExpanded] = useState(false);
+  const [showMobileChatView, setShowMobileChatView] = useState(false);
+
   // Only auto-scroll when a NEW message is actually added AND user is at the bottom
   useEffect(() => {
     const currentCount = messages.length
@@ -64,6 +69,8 @@ export default function AdminSupportPage() {
       if (data.conversations) {
         setConversations(data.conversations);
         if (!activeConversationId && data.conversations.length > 0) {
+          // On desktop, auto-select the first conversation. 
+          // We won't automatically switch the mobile view though, so they see the list first.
           setActiveConversationId(data.conversations[0].id);
         }
       }
@@ -178,40 +185,68 @@ export default function AdminSupportPage() {
 
   return (
     <main className="min-h-screen bg-background text-foreground pt-20 pb-8 px-4 flex flex-col font-sans">
-      {/* Clean Header - Title & Logout only */}
-      <header className="fixed top-4 left-0 right-0 z-50 px-4">
-        <div className="max-w-7xl mx-auto rounded-2xl border border-white/10 bg-slate-900/60 px-6 py-3 flex items-center justify-between shadow-[0_16px_40px_-24px_rgba(0,0,0,0.8)] backdrop-blur-xl">
-          <div className="flex items-center gap-3">
-            <Link href="/admin" className="flex items-center gap-2.5 hover:opacity-80 transition">
-              <div className="w-8 h-8 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center">
-                <Shield className="w-4 h-4 text-white" />
-              </div>
-              <span className="text-white font-bold text-base">Travis Pay Admin</span>
-              <span className="ml-1 text-xs bg-purple-500/20 text-purple-400 border border-purple-500/30 px-2.5 py-0.5 rounded-full font-medium">
-                Support Workspace
+      {/* Consistent Admin Header */}
+      <header className="fixed inset-x-0 top-0 z-50">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mt-4 flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 shadow-[0_16px_40px_-24px_rgba(0,0,0,0.8)] backdrop-blur-xl sm:px-6">
+            <div className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5">
+                <TravisPayLogo className="h-6 w-auto" />
               </span>
-            </Link>
-          </div>
+              <span className="text-lg font-bold tracking-tight text-foreground hidden sm:inline">Travis Pay</span>
+              <span className="text-sm font-bold tracking-widest text-muted-foreground uppercase ml-1">Admin</span>
+              <span className="ml-2 text-[10px] sm:text-xs bg-purple-500/20 text-purple-400 border border-purple-500/30 px-2.5 py-0.5 rounded-full font-medium whitespace-nowrap">
+                Support
+              </span>
+            </div>
 
-          <div className="flex items-center gap-3">
-            <Link href="/admin" className="text-sm font-medium text-slate-300 hover:text-white transition px-3">
-              Dashboard
-            </Link>
+            <nav className="hidden items-center gap-4 md:flex">
+              <Link href="/admin" className="text-sm font-medium text-slate-300 hover:text-white transition px-3">
+                Dashboard
+              </Link>
+              <button onClick={handleLogout} className="rounded-lg px-3 py-2 text-sm font-medium text-destructive hover:text-destructive/80 transition">
+                Logout
+              </button>
+            </nav>
+
             <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 text-destructive hover:text-destructive/80 bg-destructive/10 hover:bg-destructive/20 border border-destructive/20 rounded-full px-4 py-2 text-sm font-semibold transition"
+              type="button"
+              onClick={() => setIsHeaderExpanded((v) => !v)}
+              className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-foreground md:hidden"
             >
-              <LogOut className="w-4 h-4" />
-              Logout
+              {isHeaderExpanded ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
+
+          {isHeaderExpanded && (
+            <div className="mt-2 rounded-2xl border border-border bg-background/80 p-4 backdrop-blur-xl md:hidden">
+              <div className="flex flex-col gap-2">
+                <Link
+                  href="/admin"
+                  onClick={() => setIsHeaderExpanded(false)}
+                  className="rounded-xl px-4 py-2.5 text-left text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+                >
+                  Dashboard
+                </Link>
+                <button
+                  onClick={() => {
+                    setIsHeaderExpanded(false);
+                    handleLogout();
+                  }}
+                  className="rounded-xl px-4 py-2.5 text-left text-sm font-medium text-destructive transition-colors hover:bg-secondary"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </header>
 
       {/* Main Support Workspace */}
       <div className="max-w-7xl w-full mx-auto flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-120px)] mt-4">
         {/* Left Pane: Conversations List */}
-        <div className="lg:col-span-5 bg-secondary/30 rounded-2xl border border-border p-4 flex flex-col h-full overflow-hidden shadow-xl">
+        <div className={`lg:col-span-5 bg-secondary/30 rounded-2xl border border-border p-4 flex-col h-full overflow-hidden shadow-xl ${showMobileChatView ? 'hidden lg:flex' : 'flex'}`}>
           <div className="mb-4 space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
@@ -256,7 +291,10 @@ export default function AdminSupportPage() {
                 return (
                   <button
                     key={conv.id}
-                    onClick={() => setActiveConversationId(conv.id)}
+                    onClick={() => {
+                      setActiveConversationId(conv.id);
+                      setShowMobileChatView(true);
+                    }}
                     className={`w-full text-left p-3.5 rounded-xl border transition-all duration-200 relative group flex items-start justify-between gap-3 ${
                       isActive
                         ? 'bg-purple-500/15 border-purple-500/40 text-foreground shadow-lg shadow-purple-500/10'
@@ -297,12 +335,19 @@ export default function AdminSupportPage() {
         </div>
 
         {/* Right Pane: Selected Chat View */}
-        <div className="lg:col-span-7 bg-secondary/30 rounded-2xl border border-border p-4 flex flex-col h-full overflow-hidden shadow-xl">
+        <div className={`lg:col-span-7 bg-secondary/30 rounded-2xl border border-border p-4 flex-col h-full overflow-hidden shadow-xl ${showMobileChatView ? 'flex' : 'hidden lg:flex'}`}>
           {activeConversationId ? (
             <>
               {/* Chat Header */}
-              <div className="pb-3 border-b border-border flex items-center justify-between mb-4">
-                <div>
+              <div className="pb-3 border-b border-border flex items-center justify-between mb-4 gap-2">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowMobileChatView(false)}
+                    className="lg:hidden p-1.5 -ml-2 rounded-xl text-muted-foreground hover:bg-secondary transition"
+                  >
+                    <ArrowLeft className="w-5 h-5" />
+                  </button>
+                  <div>
                   <h3 className="font-bold text-foreground text-base flex items-center gap-2">
                     {activeConversation?.userEmail || activeConversation?.userName || 'User Conversation'}
                     <span className="text-xs font-normal text-muted-foreground">
@@ -312,6 +357,7 @@ export default function AdminSupportPage() {
                   <p className="text-xs text-status-green flex items-center gap-1 mt-0.5">
                     <CheckCircle2 className="w-3 h-3" /> Active Ticket
                   </p>
+                  </div>
                 </div>
                 <button
                   onClick={fetchActiveMessages}
