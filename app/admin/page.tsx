@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Menu, X, ArrowUpRight, Edit2, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Menu, X, ArrowUpRight, Edit2, Trash2, Eye, EyeOff, MessageSquare } from 'lucide-react';
 import { TravisPayLogo } from '@/components/travis-pay-logo';
+import Link from 'next/link';
 
 type Account = {
   id: string;
@@ -32,6 +33,7 @@ export default function AdminDashboard() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -50,6 +52,22 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchListings();
+    
+    // Poll for unread admin messages
+    const fetchUnreadCount = async () => {
+      try {
+        const res = await fetch('/api/admin/support');
+        const data = await res.json();
+        if (data.conversations) {
+          const totalUnread = data.conversations.reduce((sum: number, c: any) => sum + (c.unreadCountAdmin || 0), 0);
+          setUnreadCount(totalUnread);
+        }
+      } catch (err) {}
+    };
+    
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const fetchListings = async () => {
@@ -182,7 +200,16 @@ export default function AdminDashboard() {
               <span className="text-sm font-bold tracking-widest text-muted-foreground uppercase ml-1">Admin</span>
             </div>
 
-            <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
+            <nav className="hidden items-center gap-4 md:flex" aria-label="Primary">
+              <Link href="/admin/support" className="relative flex items-center gap-2 bg-gradient-to-r from-purple-600 to-purple-800 hover:opacity-90 rounded-xl px-4 py-2 text-white transition-all shadow-lg shadow-purple-500/20 group">
+                <MessageSquare className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                <span className="font-semibold text-sm">Support Chats</span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-[20px] flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold shadow-md animate-pulse border-2 border-background">
+                    {unreadCount}
+                  </span>
+                )}
+              </Link>
               <button onClick={handleLogout} className="rounded-lg px-3 py-2 text-sm font-medium text-destructive hover:text-destructive/80 transition">Logout</button>
             </nav>
 
@@ -200,6 +227,17 @@ export default function AdminDashboard() {
           {isHeaderExpanded && (
             <div className="mt-2 rounded-2xl border border-border bg-background/80 p-4 backdrop-blur-xl md:hidden">
               <div className="flex flex-col gap-2">
+                <Link
+                  href="/admin/support"
+                  className="rounded-xl px-4 py-2.5 text-left text-sm font-medium text-purple-400 hover:text-purple-300 transition-colors hover:bg-secondary flex items-center justify-between"
+                >
+                  Support Chats
+                  {unreadCount > 0 && (
+                    <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">
+                      {unreadCount} new
+                    </span>
+                  )}
+                </Link>
                 <button
                   onClick={() => {
                     setIsHeaderExpanded(false);

@@ -83,17 +83,20 @@ export default function SupportPage() {
     return () => clearInterval(interval)
   }, [user, fetchMessages])
 
-  // Only auto-scroll when a NEW message is actually added, not on every poll
+  // Only auto-scroll when a NEW message is actually added AND user is at the bottom
   useEffect(() => {
     const currentCount = messages.length
     if (currentCount > prevMessageCountRef.current) {
-      // New message was added — scroll to bottom
-      if (isInitialLoadRef.current) {
-        // On initial load, scroll instantly without animation
-        messagesEndRef.current?.scrollIntoView({ behavior: 'instant' })
-        isInitialLoadRef.current = false
-      } else {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+      const scrollContainer = messagesEndRef.current?.parentElement
+      if (scrollContainer) {
+        const isAtBottom = scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 150
+
+        if (isInitialLoadRef.current) {
+          messagesEndRef.current?.scrollIntoView({ behavior: 'instant' })
+          isInitialLoadRef.current = false
+        } else if (isAtBottom) {
+          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+        }
       }
     }
     prevMessageCountRef.current = currentCount
@@ -125,6 +128,11 @@ export default function SupportPage() {
       createdAt: new Date().toISOString(),
     }
     setMessages((prev) => [...prev, optimisticMessage])
+    
+    // Force scroll down when user sends a message
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }, 50)
 
     try {
       const res = await fetch('/api/support', {
@@ -183,50 +191,50 @@ export default function SupportPage() {
             </button>
           </div>
 
-          {/* Mobile Menu Content */}
-          {openMenu && (
-            <div className="mt-2 rounded-2xl border border-white/10 bg-slate-900/80 p-4 backdrop-blur-xl md:hidden flex flex-col gap-2 shadow-2xl">
-              <button
-                onClick={handleLogout}
-                className="w-full text-left text-muted-foreground hover:text-white px-3 py-2 text-sm font-medium transition-colors"
-              >
-                Logout
-              </button>
-            </div>
-          )}
-        </div>
-      </header>
-
-      <main className="flex-1 w-full mx-auto px-4 pt-4 pb-4 flex flex-col max-w-4xl overflow-hidden min-h-0">
-        {/* Support Banner Info */}
-        <div className="flex items-center justify-between mb-6 px-2">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
-              <span className="text-white font-bold text-lg">T</span>
-            </div>
-            <div>
-              <h2 className="text-white font-bold text-sm flex items-center gap-2">
-                Customer Assistance
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse mr-1" />
-                  Online
-                </span>
-              </h2>
-              <p className="text-slate-400 text-xs">
-                {user ? (
-                  <span className="flex items-center gap-1 text-slate-300">
-                    <User size={12} /> {user.email}
-                  </span>
-                ) : (
-                  'Please log in to contact support'
-                )}
-              </p>
+            {/* Mobile Menu Content */}
+            {openMenu && (
+              <div className="mt-2 rounded-2xl border border-white/10 bg-slate-900/80 p-4 backdrop-blur-xl md:hidden flex flex-col gap-2 shadow-2xl">
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left text-muted-foreground hover:text-white px-3 py-2 text-sm font-medium transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+            
+            {/* Support Banner Info - Moved to sticky header */}
+            <div className="flex items-center justify-between mt-4 px-2">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
+                  <span className="text-white font-bold text-lg">T</span>
+                </div>
+                <div>
+                  <h2 className="text-white font-bold text-sm flex items-center gap-2">
+                    Customer Assistance
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse mr-1" />
+                      Online
+                    </span>
+                  </h2>
+                  <p className="text-slate-400 text-xs">
+                    {user ? (
+                      <span className="flex items-center gap-1 text-slate-300">
+                        <User size={12} /> {user.email}
+                      </span>
+                    ) : (
+                      'Please log in to contact support'
+                    )}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </header>
 
-        {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto space-y-4 px-2 no-scrollbar min-h-0">
+        <main className="flex-1 w-full mx-auto px-4 pt-2 pb-4 flex flex-col max-w-4xl overflow-hidden min-h-0">
+          {/* Messages Area */}
+          <div className="flex-1 overflow-y-auto space-y-4 px-2 no-scrollbar min-h-0 pt-4">
             {loading ? (
               <div className="h-full flex items-center justify-center text-slate-400 text-sm gap-2">
                 <RefreshCw size={18} className="animate-spin text-purple-400" />
