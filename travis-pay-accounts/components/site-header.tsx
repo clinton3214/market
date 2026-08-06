@@ -7,7 +7,7 @@ const navLinks = [
   { label: "Instagram", href: "#listings" },
   { label: "Facebook", href: "#listings" },
   { label: "X", href: "#listings" },
-  { label: "Telegram", href: "#listings" },
+  { label: "TikTok", href: "#listings" },
   { label: "How It Works", href: "#listings" },
   { label: "Support", href: "#listings" },
 ]

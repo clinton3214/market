@@ -13,7 +13,7 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: 'Travis Pay — Buy Verified Social Accounts',
   description:
-    'A premium marketplace for established Instagram, Facebook, X, and Telegram accounts. Real followers, verified handles, delivered the moment you pay.',
+    'A premium marketplace for established Instagram, Facebook, X, and TikTok accounts. Real followers, verified handles, delivered the moment you pay.',
   generator: 'v0.app',
   icons: {
     icon: [

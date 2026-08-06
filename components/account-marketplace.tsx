@@ -13,7 +13,7 @@ const filters: { value: Filter; label: string }[] = [
   { value: "instagram", label: "Instagram" },
   { value: "facebook", label: "Facebook" },
   { value: "x", label: "X" },
-  { value: "telegram", label: "Telegram" },
+  { value: "tiktok", label: "TikTok" },
 ]
 
 export function AccountMarketplace() {
@@ -53,7 +53,7 @@ export function AccountMarketplace() {
   }, [active, query, accounts])
 
   const counts = useMemo(() => {
-    const c: Record<Filter, number> = { all: accounts.length, instagram: 0, facebook: 0, x: 0, telegram: 0 }
+    const c: Record<Filter, number> = { all: accounts.length, instagram: 0, facebook: 0, x: 0, tiktok: 0 }
     for (const a of accounts) {
       if (c[a.platform] !== undefined) {
         c[a.platform] += 1
@@ -99,7 +99,7 @@ export function AccountMarketplace() {
           </h1>
 
           <p className="mt-4 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
-            Hand-vetted Instagram, Facebook, X, and Telegram accounts with real followers and verified handles.
+            Hand-vetted Instagram, Facebook, X, and TikTok accounts with real followers and verified handles.
             Delivered the moment you pay.
           </p>
 

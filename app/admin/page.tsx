@@ -398,7 +398,7 @@ export default function AdminDashboard() {
                     <option value="instagram">Instagram</option>
                     <option value="facebook">Facebook</option>
                     <option value="x">X</option>
-                    <option value="telegram">Telegram</option>
+                    <option value="tiktok">TikTok</option>
                   </select>
                 </div>
                 <div>
