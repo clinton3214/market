@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { AuthProvider } from '@/components/auth-provider'
 import { Geist } from 'next/font/google'
 import './globals.css'
+import PwaRegister from '@/components/pwa-register'
 
 const geist = Geist({
   subsets: ['latin'],
@@ -14,6 +15,15 @@ export const metadata: Metadata = {
   description:
     'A premium marketplace to buy verified Instagram, Facebook, and X accounts. Secure payment, instant delivery, and 24/7 support.',
   generator: 'v0.app',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Travis Pay',
+  },
+  icons: {
+    apple: '/apple-touch-icon.png',
+  },
 }
 
 export const viewport: Viewport = {
@@ -31,6 +41,7 @@ export default function RootLayout({
     <html lang="en" className={`dark ${geist.variable}`}>
       <body className="bg-background font-sans antialiased">
         <AuthProvider>
+          <PwaRegister />
           {children}
           {process.env.NODE_ENV === 'production' && <Analytics />}
         </AuthProvider>
