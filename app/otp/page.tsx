@@ -24,6 +24,32 @@ function Chevron() { return <svg aria-hidden="true" viewBox="0 0 16 16"><path d=
 
 function SearchIcon() { return <svg aria-hidden="true" viewBox="0 0 20 20"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" strokeWidth="1.5" /><path d="m13 13 4 4" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" /></svg> }
 
+// 5sim API requires specific identifiers
+function normalizeCountry(c: string) {
+  const map: Record<string, string> = {
+    'united states': 'usa',
+    'united kingdom': 'england',
+    'ivory coast': 'ivorycoast',
+    'sierra leone': 'sierraleone',
+  };
+  const lower = c.toLowerCase();
+  return map[lower] || lower.replace(/ /g, '');
+}
+
+function normalizeProduct(p: string) {
+  const map: Record<string, string> = {
+    'playstation': 'playstation',
+    'xbox': 'xbox',
+    'riot games': 'riotgames',
+    'epic games': 'epicgames',
+    'booking.com': 'booking',
+    'just eat': 'justeat',
+    'crypto.com': 'crypto',
+  };
+  const lower = p.toLowerCase();
+  return map[lower] || lower.replace(/ /g, '');
+}
+
 function Selector({ label, value, setValue, options, grouped = false }: { label: string; value: string; setValue: (v: string) => void; options: string[] | Group[]; grouped?: boolean }) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -60,7 +86,9 @@ export default function OtpPurchasePage() {
     setError('');
     setPriceInfo(null);
     try {
-      const res = await fetch(`/api/otp/price?country=${encodeURIComponent(country.toLowerCase())}&service=${encodeURIComponent(service.toLowerCase())}`);
+      const apiCountry = normalizeCountry(country);
+      const apiService = normalizeProduct(service);
+      const res = await fetch(`/api/otp/price?country=${encodeURIComponent(apiCountry)}&service=${encodeURIComponent(apiService)}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to fetch price');
       setPriceInfo(data);
@@ -79,10 +107,12 @@ export default function OtpPurchasePage() {
     setCheckingOut(true);
     setError('');
     try {
+      const apiCountry = normalizeCountry(country);
+      const apiService = normalizeProduct(service);
       const res = await fetch('/api/otp/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, country: country.toLowerCase(), service: service.toLowerCase() }),
+        body: JSON.stringify({ email, country: apiCountry, service: apiService }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Checkout failed');
