@@ -135,7 +135,9 @@ export default function OtpPurchasePage() {
         body: JSON.stringify({ email, country: apiCountry, service: apiService }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Checkout failed');
+      if (!res.ok) {
+        throw new Error(data.details ? `${data.error}: ${data.details}` : data.error || 'Checkout failed');
+      }
       
       if (data.checkoutUrl) {
         localStorage.setItem(`otp_order_${data.orderId}`, data.wsToken);

@@ -97,14 +97,13 @@ const OtpOrderSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Ensure we push to state_transitions whenever status changes
-OtpOrderSchema.pre('save', function (next) {
+OtpOrderSchema.pre('save', function () {
   if (this.isModified('status')) {
     this.state_transitions.push({
       status: this.status,
       timestamp: new Date()
     });
   }
-  next();
 });
 
 export default mongoose.models.OtpOrder || mongoose.model('OtpOrder', OtpOrderSchema);
