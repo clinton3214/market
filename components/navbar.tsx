@@ -12,6 +12,8 @@ const links = [
   { label: 'Instagram', href: '/#categories' },
   { label: 'Facebook', href: '/#categories' },
   { label: 'X', href: '/#categories' },
+  { label: 'TikTok', href: '/#categories' },
+  { label: 'Foreign Numbers', href: '/otp' },
   { label: 'How It Works', href: '/#how-it-works' },
   { label: 'Support', href: '/support' },
 ]

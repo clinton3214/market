@@ -33,5 +33,13 @@ export function PlatformIcon({ platform, className = "h-5 w-5" }: Props) {
           <path d="M19.59 6.69a4.83 4.83 0 0 1-3.97-1.54 4.8 4.8 0 0 1-1.12-3.15h-3.61v14.15c0 2.22-1.8 4.03-4.03 4.03s-4.03-1.81-4.03-4.03 1.8-4.03 4.03-4.03c.78 0 1.5.22 2.11.6v-3.8a7.62 7.62 0 0 0-2.11-.31c-4.22 0-7.63 3.41-7.63 7.63s3.41 7.63 7.63 7.63 7.63-3.41 7.63-7.63V9.9a8.4 8.4 0 0 0 4.19 1.12v-3.66a5.55 5.55 0 0 1-.09-.67Z" />
         </svg>
       )
+    case "foreign_number":
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+          <path d="M2 12h20" />
+        </svg>
+      )
   }
 }

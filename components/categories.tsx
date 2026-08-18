@@ -1,7 +1,7 @@
 'use client'
 
 import { ArrowUpRight } from 'lucide-react'
-import { InstagramIcon, FacebookIcon, XIcon } from '@/components/brand-icons'
+import { InstagramIcon, FacebookIcon, XIcon, TikTokIcon, GlobeIcon } from '@/components/brand-icons'
 import { useAuth } from '@/components/auth-provider'
 import { useRouter } from 'next/navigation'
 
@@ -26,6 +26,21 @@ const categories = [
     count: '520 accounts',
     Icon: XIcon,
     glow: 'group-hover:shadow-[0_0_60px_-12px_rgba(148,163,184,0.45)]',
+  },
+  {
+    name: 'TikTok',
+    label: 'Channels & active groups',
+    count: '340 accounts',
+    Icon: TikTokIcon,
+    glow: 'group-hover:shadow-[0_0_60px_-12px_rgba(255,0,80,0.55)]',
+  },
+  {
+    name: 'Foreign Numbers',
+    label: 'Virtual numbers for OTP verification',
+    count: 'On-demand',
+    Icon: GlobeIcon,
+    glow: 'group-hover:shadow-[0_0_60px_-12px_rgba(16,185,129,0.55)]',
+    href: '/otp',
   },
 ]
 
@@ -57,8 +72,8 @@ export function Categories() {
         {categories.map((cat) => (
           <a
             key={cat.name}
-            href="/accounts"
-            onClick={(e) => handleCategoryClick(e, '/accounts')}
+            href={cat.href || '/accounts'}
+            onClick={(e) => handleCategoryClick(e, cat.href || '/accounts')}
             className={`group glass-card flex flex-col justify-between rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 ${cat.glow}`}
           >
             <div className="flex items-start justify-between">

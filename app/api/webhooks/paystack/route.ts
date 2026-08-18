@@ -27,6 +27,51 @@ export async function POST(request: Request) {
     const event = JSON.parse(bodyText);
 
     if (event.event === 'charge.success') {
+      const orderType = event.data.metadata?.order_type;
+
+      if (orderType === 'otp') {
+        const orderId = event.data.metadata?.order_id;
+        if (!orderId) return NextResponse.json({ error: "Missing order_id" }, { status: 400 });
+
+        await dbConnect();
+        const OtpOrder = require('@/models/OtpOrder').default;
+        
+        const order = await OtpOrder.findById(orderId);
+        
+        if (order && order.status === 'pending_payment') {
+          // Idempotency: only process if it is pending_payment
+          order.status = 'paid';
+          await order.save();
+          
+          console.log(`[OTP] Order ${orderId} paid successfully!`);
+          
+          // Trigger the detached background process on server.js
+          const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ? `https://${process.env.NEXT_PUBLIC_BACKEND_URL}` : 'http://localhost:5000';
+          const triggerBackend = async (retries = 3) => {
+            for (let i = 0; i < retries; i++) {
+              try {
+                const res = await fetch(`${backendUrl}/api/internal/start-otp-process`, {
+                  method: 'POST',
+                  headers: { 
+                    'Content-Type': 'application/json',
+                    'x-internal-secret': process.env.INTERNAL_SECRET_KEY || 'default_secret'
+                  },
+                  body: JSON.stringify({ orderId }),
+                });
+                if (res.ok) return;
+              } catch (err) {
+                console.error(`Trigger backend attempt ${i + 1} failed:`, err);
+              }
+              await new Promise(resolve => setTimeout(resolve, 1000)); // 1s backoff
+            }
+          };
+          triggerBackend();
+        }
+        
+        // Fast response
+        return NextResponse.json({ received: true });
+      }
+
       const accountId = event.data.metadata?.account_id;
       const buyerEmail = event.data.customer?.email;
 

@@ -14,6 +14,7 @@ const filters: { value: Filter; label: string }[] = [
   { value: "facebook", label: "Facebook" },
   { value: "x", label: "X" },
   { value: "tiktok", label: "TikTok" },
+  { value: "foreign_number", label: "Foreign Number" },
 ]
 
 export function AccountMarketplace() {
@@ -53,7 +54,7 @@ export function AccountMarketplace() {
   }, [active, query, accounts])
 
   const counts = useMemo(() => {
-    const c: Record<Filter, number> = { all: accounts.length, instagram: 0, facebook: 0, x: 0, tiktok: 0 }
+    const c: Record<Filter, number> = { all: accounts.length, instagram: 0, facebook: 0, x: 0, tiktok: 0, foreign_number: 0 }
     for (const a of accounts) {
       if (c[a.platform] !== undefined) {
         c[a.platform] += 1
@@ -127,7 +128,13 @@ export function AccountMarketplace() {
               <button
                 key={f.value}
                 type="button"
-                onClick={() => setActive(f.value)}
+                onClick={() => {
+                  if (f.value === "foreign_number") {
+                    window.location.href = "/otp"
+                  } else {
+                    setActive(f.value)
+                  }
+                }}
                 className={
                   "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium backdrop-blur-md transition-all " +
                   (isActive
@@ -137,9 +144,11 @@ export function AccountMarketplace() {
               >
                 {f.value !== "all" ? <PlatformIcon platform={f.value} className="h-4 w-4" /> : null}
                 {f.label}
-                <span className={isActive ? "text-primary-foreground/80" : "text-muted-foreground/70"}>
-                  {counts[f.value]}
-                </span>
+                {f.value !== "foreign_number" && (
+                  <span className={isActive ? "text-primary-foreground/80" : "text-muted-foreground/70"}>
+                    {counts[f.value]}
+                  </span>
+                )}
               </button>
             )
           })}

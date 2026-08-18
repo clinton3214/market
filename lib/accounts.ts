@@ -1,4 +1,4 @@
-export type Platform = "instagram" | "facebook" | "x" | "tiktok"
+export type Platform = "instagram" | "facebook" | "x" | "tiktok" | "foreign_number"
 
 export type Account = {
   id: string
@@ -21,6 +21,7 @@ export const platformMeta: Record<
   facebook: { label: "Facebook", blurb: "Pages, groups & aged profiles" },
   x: { label: "X", blurb: "Verified handles & audiences" },
   tiktok: { label: "TikTok", blurb: "Channels & active groups" },
+  foreign_number: { label: "Foreign Numbers", blurb: "Virtual numbers for OTP" },
 }
 
 export const accounts: Account[] = [
