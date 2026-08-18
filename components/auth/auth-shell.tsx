@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { Shield } from 'lucide-react'
+import { TravisPayLogo } from '@/components/travis-pay-logo'
 
 type AuthShellProps = {
   title: string
@@ -38,7 +39,7 @@ export function AuthShell({ title, subtitle, badge, children, footer }: AuthShel
               className="mb-6 flex items-center gap-2.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 backdrop-blur"
             >
               <span className="flex size-6 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <Shield className="size-3.5" />
+                <TravisPayLogo className="size-3.5" />
               </span>
               <span className="text-sm font-semibold tracking-tight">Travis Pay</span>
             </Link>

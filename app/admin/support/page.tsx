@@ -72,6 +72,10 @@ export default function AdminSupportPage() {
           // On desktop, auto-select the first conversation. 
           // We won't automatically switch the mobile view though, so they see the list first.
           setActiveConversationId(data.conversations[0].id);
+          // optimistically clear unread on the selected one
+          if (data.conversations[0].unreadCountAdmin > 0) {
+            setConversations(prev => prev.map(c => c.id === data.conversations[0].id ? { ...c, unreadCountAdmin: 0 } : c));
+          }
         }
       }
     } catch (err) {
@@ -125,7 +129,26 @@ export default function AdminSupportPage() {
 
   const handleLogout = () => {
     document.cookie = "admin_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    window.location.href = '/admin/login';
+    window.location.href = '/login';
+  };
+
+  const handleClearChat = async () => {
+    if (!activeConversationId) return;
+    if (!confirm('Are you sure you want to resolve and clear this chat? This cannot be undone.')) return;
+
+    try {
+      const res = await fetch(`/api/admin/support/${activeConversationId}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        setActiveConversationId(null);
+        setMessages([]);
+        setActiveConversation(null);
+        fetchConversations();
+      }
+    } catch (err) {
+      console.error('Failed to clear chat:', err);
+    }
   };
 
   const handleSendReply = async () => {
@@ -184,7 +207,7 @@ export default function AdminSupportPage() {
   });
 
   return (
-    <main className="min-h-screen bg-background text-foreground pt-20 pb-8 px-4 flex flex-col font-sans">
+    <main className="h-[100dvh] overflow-hidden bg-background text-foreground pt-20 pb-8 px-4 flex flex-col font-sans">
       {/* Consistent Admin Header */}
       <header className="fixed inset-x-0 top-0 z-50">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -244,7 +267,7 @@ export default function AdminSupportPage() {
       </header>
 
       {/* Main Support Workspace */}
-      <div className="max-w-7xl w-full mx-auto flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-120px)] mt-4">
+      <div className="max-w-7xl w-full mx-auto flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-120px)] mt-4 min-h-0">
         {/* Left Pane: Conversations List */}
         <div className={`lg:col-span-5 bg-secondary/30 rounded-2xl border border-border p-4 flex-col h-full overflow-hidden shadow-xl ${showMobileChatView ? 'hidden lg:flex' : 'flex'}`}>
           <div className="mb-4 space-y-3">
@@ -294,6 +317,9 @@ export default function AdminSupportPage() {
                     onClick={() => {
                       setActiveConversationId(conv.id);
                       setShowMobileChatView(true);
+                      if (conv.unreadCountAdmin > 0) {
+                        setConversations(prev => prev.map(c => c.id === conv.id ? { ...c, unreadCountAdmin: 0 } : c));
+                      }
                     }}
                     className={`w-full text-left p-3.5 rounded-xl border transition-all duration-200 relative group flex items-start justify-between gap-3 ${
                       isActive
@@ -359,13 +385,22 @@ export default function AdminSupportPage() {
                   </p>
                   </div>
                 </div>
-                <button
-                  onClick={fetchActiveMessages}
-                  className="p-2 rounded-xl bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground transition"
-                  title="Refresh chat"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleClearChat}
+                    className="p-2 rounded-xl bg-destructive/10 text-destructive hover:bg-destructive/20 transition text-xs font-semibold px-3"
+                    title="Clear chat"
+                  >
+                    Resolve
+                  </button>
+                  <button
+                    onClick={fetchActiveMessages}
+                    className="p-2 rounded-xl bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground transition"
+                    title="Refresh chat"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
 
               {/* Chat History Box */}

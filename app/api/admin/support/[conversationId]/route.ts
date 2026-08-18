@@ -109,3 +109,33 @@ export async function POST(
     );
   }
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ conversationId: string }> }
+) {
+  try {
+    await dbConnect();
+    const { conversationId } = await params;
+
+    const conversation = await Conversation.findById(conversationId);
+    if (!conversation) {
+      return NextResponse.json(
+        { error: 'Conversation not found' },
+        { status: 404, headers: corsHeaders() }
+      );
+    }
+
+    // Delete messages and conversation
+    await Message.deleteMany({ conversationId: conversation._id });
+    await Conversation.findByIdAndDelete(conversationId);
+
+    return NextResponse.json({ success: true }, { headers: corsHeaders() });
+  } catch (error: any) {
+    console.error('Error in DELETE /api/admin/support/[conversationId]:', error);
+    return NextResponse.json(
+      { error: error.message || 'Server error' },
+      { status: 500, headers: corsHeaders() }
+    );
+  }
+}

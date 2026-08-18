@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Loader2, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/components/auth-provider'
+import { Navbar } from '@/components/navbar'
 
 type Group = { label: string; platforms: string[] }
 
@@ -93,6 +94,7 @@ export default function OtpPurchasePage() {
   if (loading || !user) {
     return (
       <main className="selector-page">
+        <Navbar />
         <section className="selector-hero flex items-center justify-center min-h-screen">
           <Loader2 className="w-8 h-8 animate-spin text-white/50" />
         </section>
@@ -151,6 +153,7 @@ export default function OtpPurchasePage() {
 
   return (
     <main className="selector-page">
+      <Navbar />
       <section className="selector-hero" id="top">
         <div className="eyebrow"><span /> Instant delivery</div>
         <h1 className="hero-h1">Rent a <span>foreign number</span><br />in seconds</h1>

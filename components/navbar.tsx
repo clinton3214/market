@@ -9,10 +9,10 @@ import { useAuth } from '@/components/auth-provider'
 import { TravisPayLogo } from '@/components/travis-pay-logo'
 
 const links = [
-  { label: 'Instagram', href: '/#categories', requiresAuth: false },
-  { label: 'Facebook', href: '/#categories', requiresAuth: false },
-  { label: 'X', href: '/#categories', requiresAuth: false },
-  { label: 'TikTok', href: '/#categories', requiresAuth: false },
+  { label: 'Instagram', href: '/accounts?platform=instagram', requiresAuth: false },
+  { label: 'Facebook', href: '/accounts?platform=facebook', requiresAuth: false },
+  { label: 'X', href: '/accounts?platform=x', requiresAuth: false },
+  { label: 'TikTok', href: '/accounts?platform=tiktok', requiresAuth: false },
   { label: 'Foreign Numbers', href: '/otp', requiresAuth: true },
   { label: 'How It Works', href: '/#how-it-works', requiresAuth: false },
   { label: 'Support', href: '/support', requiresAuth: false },

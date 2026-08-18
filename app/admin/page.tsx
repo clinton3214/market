@@ -34,6 +34,8 @@ export default function AdminDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [unreadCount, setUnreadCount] = useState<number>(0);
+  const [otpCount, setOtpCount] = useState<number>(0);
+  const [otpRevenue, setOtpRevenue] = useState<number>(0);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -64,8 +66,20 @@ export default function AdminDashboard() {
         }
       } catch (err) {}
     };
+
+    const fetchStats = async () => {
+      try {
+        const res = await fetch('/api/admin/stats');
+        const data = await res.json();
+        if (data.otpCount !== undefined) {
+          setOtpCount(data.otpCount);
+          setOtpRevenue(data.otpRevenue || 0);
+        }
+      } catch (err) {}
+    };
     
     fetchUnreadCount();
+    fetchStats();
     const interval = setInterval(fetchUnreadCount, 5000);
     return () => clearInterval(interval);
   }, []);
@@ -172,7 +186,7 @@ export default function AdminDashboard() {
 
   const handleLogout = () => {
     document.cookie = "admin_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    window.location.href = '/admin/login';
+    window.location.href = '/login';
   };
 
   const filteredAccounts = activeFilter === 'all' 
@@ -181,7 +195,7 @@ export default function AdminDashboard() {
     ? accounts.filter(a => a.status === 'sold')
     : accounts.filter((a) => a.platform.toLowerCase() === activeFilter && a.status !== 'sold');
 
-  const totalRevenue = accounts.filter(a => a.status === 'sold').reduce((sum, a) => sum + (a.price || 0), 0);
+  const totalRevenue = accounts.filter(a => a.status === 'sold').reduce((sum, a) => sum + (a.price || 0), 0) + otpRevenue;
   const activeCount = accounts.filter(a => a.status === 'available').length;
   const soldCount = accounts.filter(a => a.status === 'sold').length;
 
@@ -257,7 +271,7 @@ export default function AdminDashboard() {
       <div className="pt-24 pb-12 px-4">
         <div className="max-w-7xl mx-auto">
           {/* Hero Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-12">
             <div className="bg-secondary/40 border border-border rounded-2xl p-6 transition-all group">
               <div className="flex items-start justify-between">
                 <div>
@@ -297,6 +311,15 @@ export default function AdminDashboard() {
                 </div>
               </div>
             </div>
+
+            <div className="bg-secondary/40 border border-border rounded-2xl p-6 transition-all group">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-muted-foreground text-sm mb-1">Foreign Nums Sold</p>
+                  <p className="text-3xl font-bold text-purple-400">{otpCount}</p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Accounts Section */}
@@ -317,7 +340,7 @@ export default function AdminDashboard() {
 
             {/* Filter Tabs */}
             <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-              {['all', 'instagram', 'facebook', 'x', 'sold'].map((filter) => (
+              {['all', 'instagram', 'facebook', 'x', 'tiktok', 'sold'].map((filter) => (
                 <button
                   key={filter}
                   onClick={() => setActiveFilter(filter)}
