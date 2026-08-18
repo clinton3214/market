@@ -32,7 +32,9 @@ export async function getLivePrice(country: string, product: string): Promise<nu
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch 5sim prices: ${response.statusText}`);
+    const errorText = await response.text();
+    console.error(`5sim prices API error details (URL: ${FIVESIM_BASE_URL}/guest/prices?country=${country}&product=${product}):`, errorText);
+    throw new Error(`Failed to fetch 5sim prices: ${response.statusText} - ${errorText}`);
   }
 
   const data = await response.json();
