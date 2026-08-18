@@ -1,9 +1,10 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useAuth } from '@/components/auth-provider'
 
 type Group = { label: string; platforms: string[] }
 
@@ -72,6 +73,7 @@ function Selector({ label, value, setValue, options, grouped = false }: { label:
 
 export default function OtpPurchasePage() {
   const router = useRouter()
+  const { user, loading } = useAuth()
   const [country, setCountry] = useState('')
   const [service, setService] = useState('')
   const [email, setEmail] = useState('')
@@ -79,6 +81,24 @@ export default function OtpPurchasePage() {
   const [loadingPrice, setLoadingPrice] = useState(false)
   const [checkingOut, setCheckingOut] = useState(false)
   const [error, setError] = useState('')
+
+  // Auth guard: redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login')
+    }
+  }, [loading, user, router])
+
+  // Show nothing while checking auth
+  if (loading || !user) {
+    return (
+      <main className="selector-page">
+        <section className="selector-hero flex items-center justify-center min-h-screen">
+          <Loader2 className="w-8 h-8 animate-spin text-white/50" />
+        </section>
+      </main>
+    )
+  }
 
   const fetchPrice = async () => {
     if (!country || !service) return;

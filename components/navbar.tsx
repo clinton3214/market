@@ -9,13 +9,13 @@ import { useAuth } from '@/components/auth-provider'
 import { TravisPayLogo } from '@/components/travis-pay-logo'
 
 const links = [
-  { label: 'Instagram', href: '/#categories' },
-  { label: 'Facebook', href: '/#categories' },
-  { label: 'X', href: '/#categories' },
-  { label: 'TikTok', href: '/#categories' },
-  { label: 'Foreign Numbers', href: '/otp' },
-  { label: 'How It Works', href: '/#how-it-works' },
-  { label: 'Support', href: '/support' },
+  { label: 'Instagram', href: '/#categories', requiresAuth: false },
+  { label: 'Facebook', href: '/#categories', requiresAuth: false },
+  { label: 'X', href: '/#categories', requiresAuth: false },
+  { label: 'TikTok', href: '/#categories', requiresAuth: false },
+  { label: 'Foreign Numbers', href: '/otp', requiresAuth: true },
+  { label: 'How It Works', href: '/#how-it-works', requiresAuth: false },
+  { label: 'Support', href: '/support', requiresAuth: false },
 ]
 
 export function Navbar() {
@@ -45,12 +45,21 @@ export function Navbar() {
           <ul className="hidden items-center gap-1 md:flex">
             {links.map((link) => (
               <li key={link.label}>
-                <a
-                  href={link.href}
-                  className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  {link.label}
-                </a>
+                {link.requiresAuth && !user ? (
+                  <a
+                    href="/login"
+                    className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    {link.label}
+                  </a>
+                ) : (
+                  <a
+                    href={link.href}
+                    className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    {link.label}
+                  </a>
+                )}
               </li>
             ))}
           </ul>
@@ -103,7 +112,7 @@ export function Navbar() {
               {links.map((link) => (
                 <li key={link.label}>
                   <a
-                    href={link.href}
+                    href={link.requiresAuth && !user ? '/login' : link.href}
                     onClick={() => setOpen(false)}
                     className="block rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                   >
