@@ -12,6 +12,16 @@ const getHeaders = () => ({
   'Accept': 'application/json',
 });
 
+const allowedOrigins = [
+  'https://travispays.com',
+  'https://www.travispays.com',
+  'http://localhost:3000'
+];
+if (process.env.CLIENT_URL) {
+  allowedOrigins.push(process.env.CLIENT_URL);
+}
+
+
 async function getFiveSimBalance() {
   const response = await fetch(`${FIVESIM_BASE_URL}/user/profile`, { headers: getHeaders() });
   if (!response.ok) throw new Error(`Failed to fetch 5sim balance: ${response.statusText}`);
@@ -93,7 +103,16 @@ const OtpOrder = mongoose.models.OtpOrder || mongoose.model('OtpOrder', OtpOrder
 // Server Setup
 const PORT = process.env.PORT || 5000;
 const server = http.createServer((req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  } else if (!origin) {
+    // Allow non-browser clients (like curl)
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', allowedOrigins[0]);
+  }
+  
   res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, POST, GET');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
@@ -134,7 +153,7 @@ const server = http.createServer((req, res) => {
 
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: allowedOrigins,
     methods: ["GET", "POST"]
   }
 });
