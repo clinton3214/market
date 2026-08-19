@@ -60,6 +60,11 @@ export function FeaturedAccounts() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ accountId })
       })
+      if (res.status === 401) {
+        window.location.href = `/login?callbackUrl=/`
+        return
+      }
+      
       const data = await res.json()
       if (data.checkoutUrl) {
         window.location.href = data.checkoutUrl

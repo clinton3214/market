@@ -22,6 +22,10 @@ const listingSchema = new mongoose.Schema(
       twoFactorAuth: { type: String },
       backupCode: { type: String },
     },
+    
+    // Purchase tracking
+    buyerEmail: { type: String },
+    purchasedAt: { type: Date },
   },
   { timestamps: true }
 );

@@ -15,7 +15,7 @@ const links = [
   { label: 'X', href: '/accounts?platform=x', requiresAuth: false },
   { label: 'TikTok', href: '/accounts?platform=tiktok', requiresAuth: false },
   { label: 'Foreign Numbers', href: '/otp', requiresAuth: true },
-  { label: 'How It Works', href: '/#how-it-works', requiresAuth: false },
+  { label: 'Purchases', href: '/purchases', requiresAuth: true },
   { label: 'Support', href: '/support', requiresAuth: false },
 ]
 

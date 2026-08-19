@@ -85,6 +85,8 @@ export async function POST(request: Request) {
       
       if (account && account.status === 'available') {
         account.status = 'sold';
+        account.buyerEmail = buyerEmail;
+        account.purchasedAt = new Date();
         await account.save();
         
         console.log(`[Delivery] Account ${accountId} sold to ${buyerEmail}!`);

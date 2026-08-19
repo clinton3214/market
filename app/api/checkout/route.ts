@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import dbConnect from '@/lib/mongodb';
 import Listing from '@/models/Listing';
+import User from '@/models/User';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,11 +10,24 @@ const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 
 export async function POST(request: Request) {
   try {
-    const { accountId, email } = await request.json();
+    const { accountId } = await request.json();
     
     console.log('[Checkout API] Received accountId:', accountId);
     
+    const cookieStore = await cookies();
+    const token = cookieStore.get('auth_token')?.value;
+
+    if (!token) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    
     await dbConnect();
+
+    const user = await User.findById(token);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const email = user.email;
     
     // Ensure the listing is still available
     const account = await Listing.findOne({ _id: accountId, status: 'available' });

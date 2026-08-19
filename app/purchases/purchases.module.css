@@ -1,0 +1,81 @@
+.selectorPage { min-height: 100vh; overflow: hidden; background: radial-gradient(ellipse 50% 30% at 50% 53%, rgba(61, 42, 100, .15), transparent 72%), #080808; }
+.glassHeader { position: relative; z-index: 10; display: flex; align-items: center; justify-content: space-between; width: min(1216px, calc(100% - 40px)); min-height: 58px; margin: 16px auto 0; padding: 0 14px 0 25px; border: 1px solid rgba(255,255,255,.13); border-radius: 30px; background: rgba(25,25,25,.66); box-shadow: inset 0 1px rgba(255,255,255,.035), 0 12px 40px rgba(0,0,0,.18); backdrop-filter: blur(22px) saturate(150%); }
+.brand { display: flex; align-items: center; gap: 10px; color: #f3f3f5; font-size: 17px; font-weight: 700; text-decoration: none; }
+.brandMark { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: #a35aff; font-size: 20px; font-weight: 800; background: #211a2c; box-shadow: inset 0 0 0 1px rgba(255,255,255,.05); }
+.desktopNav { display: flex; align-items: center; gap: 27px; }
+.desktopNav a, .mobileNav a { color: #97979f; font-size: 14px; text-decoration: none; transition: color .2s ease; }
+.desktopNav a:hover, .mobileNav a:hover { color: #fff; }
+.navSignup { padding: 9px 15px; border-radius: 19px; color: white !important; background: linear-gradient(105deg, #a24ef0, #397ff1); box-shadow: 0 8px 19px rgba(91, 74, 255, .25); }
+.menuToggle { display: none; border: 1px solid rgba(255,255,255,.1); border-radius: 50%; width: 36px; height: 36px; background: transparent; }
+.menuToggle span { display: block; width: 14px; height: 1px; margin: 4px auto; background: #ddd; }
+.selectorHero { display: flex; flex-direction: column; align-items: center; padding: 92px 20px 60px; text-align: center; }
+.eyebrow { display: flex; align-items: center; gap: 8px; padding: 7px 13px; border: 1px solid rgba(255,255,255,.1); border-radius: 20px; color: #9999a4; font-size: 12px; background: rgba(255,255,255,.035); }
+.eyebrow span { width: 6px; height: 6px; border-radius: 50%; background: #9253ff; box-shadow: 0 0 9px #9253ff; }
+.heading1 { max-width: 800px; margin: 27px 0 17px; color: #f6f6f7; font-size: clamp(42px, 7vw, 72px); line-height: .98; letter-spacing: -3px; font-weight: 750; text-wrap: balance; }
+.heading1 span { background: linear-gradient(100deg, #a947ee 8%, #507cff 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.heroCopy { max-width: 570px; margin: 0 0 42px; color: #90909b; font-size: 16px; line-height: 1.7; }
+
+.purchasesPage { min-height: 100vh; background: radial-gradient(ellipse 50% 38% at 50% 22%, rgba(77, 48, 132, .18), transparent 72%), #080808; }
+.purchasesHeader { position: sticky; top: 16px; z-index: 50; }
+.activeNav { color: #e5d9ff !important; }
+.purchasesContent { width: min(1060px, calc(100% - 40px)); margin: 0 auto; padding: 120px 0 80px; }
+.purchasesHeading { display: flex; align-items: end; justify-content: space-between; gap: 24px; }
+.purchasesHeading h1 { margin: 22px 0 12px; font-size: clamp(44px, 6vw, 68px); color: #f6f6f7; line-height: .98; letter-spacing: -3px; font-weight: 750; text-wrap: balance; }
+.purchasesHeading h1 span { background: linear-gradient(100deg, #a947ee 8%, #507cff 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.purchasesCopy { margin: 0; color: #92929d; line-height: 1.6; }
+.compactButton { display: inline-block; min-width: auto; padding: 12px 17px; text-decoration: none; }
+.browseButton { min-width: 190px; padding: 13px 20px; border: 0; border-radius: 12px; color: #fff; font-weight: 700; background: linear-gradient(105deg, #a34ff0, #397ff1); box-shadow: 0 10px 28px rgba(92, 67, 239, .24); transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+.browseButton:disabled { cursor: not-allowed; opacity: .42; box-shadow: none; }
+.browseButton:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 13px 32px rgba(92, 67, 239, .4); }
+.browseButton span { margin-left: 12px; font-size: 18px; }
+.purchaseStats { display: flex; gap: 12px; margin: 44px 0 24px; }
+.purchaseStats div { display: flex; min-width: 150px; flex-direction: column; gap: 5px; padding: 17px 20px; border: 1px solid rgba(255,255,255,.1); border-radius: 14px; background: rgba(255,255,255,.035); }
+.purchaseStats strong { color: #f3f1f9; font-size: 24px; letter-spacing: -.7px; }
+.purchaseStats span, .purchaseMeta span { color: #858590; font-size: 12px; }
+.purchasesToolbar { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 16px; }
+.purchaseSearch { display: flex; align-items: center; gap: 10px; width: min(430px, 100%); padding: 0 14px; border: 1px solid rgba(255,255,255,.12); border-radius: 11px; color: #777784; background: rgba(255,255,255,.04); }
+.purchaseSearch span { font-size: 22px; }
+.purchaseSearch input { width: 100%; height: 45px; border: 0; outline: 0; color: #eee; background: transparent; font-size: 13px; }
+.purchaseSearch input::placeholder { color: #70707b; }
+.filterGroups { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.filterGroup { display: flex; gap: 6px; padding: 3px; border: 1px solid rgba(255,255,255,.07); border-radius: 11px; background: rgba(255,255,255,.025); }
+.filterButton { padding: 9px 12px; border: 1px solid transparent; border-radius: 9px; color: #858590; background: transparent; font-size: 12px; cursor: pointer; transition: all 0.2s; }
+.filterButton.active, .filterButton:hover { border-color: rgba(151,96,255,.35); color: #ded1fb; background: rgba(151,96,255,.12); }
+.purchaseList { display: grid; gap: 12px; }
+.purchaseCard { display: flex; align-items: center; justify-content: space-between; gap: 28px; padding: 19px 21px; border: 1px solid rgba(255,255,255,.1); border-radius: 16px; background: rgba(20,20,21,.68); box-shadow: inset 0 1px rgba(255,255,255,.03); backdrop-filter: blur(18px); }
+.purchaseCardMain { display: flex; align-items: center; gap: 14px; min-width: 280px; }
+.purchasePlatformIcon { display: grid; width: 42px; height: 42px; flex: 0 0 auto; place-items: center; border-radius: 12px; color: #fff; font-size: 21px; background: linear-gradient(135deg, #9c4bf1, #417cf3); }
+.purchasePlatformIcon.whatsapp { background: #1f9c72; }.purchasePlatformIcon.tiktok { background: #202126; }.purchasePlatformIcon.telegram { background: #318cc3; }.purchasePlatformIcon.twitter { background: #29292e; }.purchasePlatformIcon.facebook { background: #1877f2; }
+.purchaseInfo { min-width: 0; }.purchaseTitleRow { display: flex; align-items: center; gap: 10px; }.purchaseInfo h2 { margin: 0; color: #f0eef5; font-size: 15px; font-weight: 600; }.purchaseInfo p { margin: 5px 0 8px; color: #777783; font-size: 11px; }.purchaseAccount { color: #cbb9ed; font-size: 13px; font-weight: 500; }
+.purchaseStatus { padding: 4px 7px; border-radius: 6px; font-size: 10px; }.purchaseStatus.delivered { color: #81d9af; background: rgba(75,196,133,.1); }.purchaseStatus.processing { color: #f0c479; background: rgba(240,196,121,.1); }
+.purchaseMeta { display: flex; align-items: center; gap: 25px; }.purchaseMeta div { display: flex; min-width: 88px; flex-direction: column; gap: 5px; }.purchaseMeta strong { color: #d3d1d8; font-size: 12px; font-weight: 500; }.copyButton { padding: 9px 11px; border: 1px solid rgba(151,96,255,.35); border-radius: 9px; color: #cdbaff; background: rgba(151,96,255,.09); font-size: 11px; white-space: nowrap; cursor: pointer; transition: all 0.2s; }.copyButton:hover { background: rgba(151,96,255,.18); }
+.emptyPurchases { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 60px; border: 1px dashed rgba(255,255,255,.14); border-radius: 16px; color: #858590; }.emptyPurchases strong { color: #e6e3ed; font-weight: 600; }
+
+.credentialsPanel { margin-top: 16px; padding: 16px; border: 1px solid rgba(255,255,255,.1); border-radius: 12px; background: rgba(0,0,0,.3); display: grid; gap: 8px; grid-template-columns: 1fr 1fr; font-size: 12px; color: #d3d1d8; }
+.credentialItem { display: flex; flex-direction: column; gap: 4px; }
+.credentialLabel { color: #858590; font-size: 11px; }
+.credentialValue { font-family: monospace; background: rgba(255,255,255,.05); padding: 6px 8px; border-radius: 6px; user-select: all; }
+
+@media (max-width: 850px) { .purchaseCard { align-items: stretch; flex-direction: column; gap: 18px; }.purchaseMeta { flex-wrap: wrap; gap: 16px 24px; }.copyButton { margin-left: auto; } }
+@media (max-width: 700px) { 
+  .purchasesContent { width: calc(100% - 28px); padding-top: 60px; }
+  .purchasesHeading { align-items: stretch; flex-direction: column; }
+  .purchasesHeading h1 { margin-top: 20px; }
+  .compactButton { align-self: flex-start; }
+  .purchaseStats { overflow-x: auto; margin-top: 30px; }
+  .purchaseStats div { min-width: 135px; }
+  .purchasesToolbar { align-items: stretch; flex-direction: column; }
+  .purchaseSearch { width: 100%; }
+  .filterGroups { justify-content: flex-start; overflow-x: auto; flex-wrap: nowrap; }
+  .filterGroup { flex: 0 0 auto; overflow-x: auto; }
+  .filterButton { white-space: nowrap; }
+  .purchaseCard { padding: 17px; }
+  .purchaseMeta { display: grid; grid-template-columns: 1fr 1fr; }
+  .copyButton { grid-column: span 2; margin-left: 0; } 
+  .credentialsPanel { grid-template-columns: 1fr; }
+}
+
+.mobileNav { display: none; }
+.mobileNav.open { position: absolute; top: 68px; left: 0; right: 0; display: flex; flex-direction: column; gap: 24px; padding: 23px 28px 26px; border: 1px solid rgba(255,255,255,.12); border-radius: 20px; background: rgba(20,20,21,.9); box-shadow: 0 20px 45px rgba(0,0,0,.45); backdrop-filter: blur(22px); z-index: 100; }
+.mobileNav.open .navSignup { width: 100%; padding: 12px; text-align: center; }
+@media (max-width: 700px) { .glassHeader { width: calc(100% - 28px); margin-top: 10px; padding-left: 18px; } .desktopNav { display: none; } .menuToggle { display: block; } }

@@ -11,7 +11,7 @@ const navLinks = [
   { label: "Facebook", href: "/accounts?platform=facebook" },
   { label: "X", href: "/accounts?platform=x" },
   { label: "TikTok", href: "/accounts?platform=tiktok" },
-  { label: "How It Works", href: "/#listings" },
+  { label: "Purchases", href: "/purchases" },
   { label: "Support", href: "/support" },
 ]
 

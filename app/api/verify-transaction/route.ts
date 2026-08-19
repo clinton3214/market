@@ -46,6 +46,10 @@ export async function GET(request: Request) {
       // If the webhook hasn't fired yet, we can mark it as sold here too
       if (account.status === 'available') {
         account.status = 'sold';
+        if (data.data.customer?.email) {
+          account.buyerEmail = data.data.customer.email;
+        }
+        account.purchasedAt = new Date();
         await account.save();
         
         // Also trigger the email securely from the backend so it works locally without webhook
