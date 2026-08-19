@@ -58,12 +58,13 @@
 
 @media (max-width: 850px) { .purchaseCard { align-items: stretch; flex-direction: column; gap: 18px; }.purchaseMeta { flex-wrap: wrap; gap: 16px 24px; }.copyButton { margin-left: auto; } }
 @media (max-width: 700px) { 
-  .purchasesContent { width: calc(100% - 28px); padding-top: 60px; }
+  .purchasesContent { width: calc(100% - 28px); padding-top: 110px; }
   .purchasesHeading { align-items: stretch; flex-direction: column; }
   .purchasesHeading h1 { margin-top: 20px; }
   .compactButton { align-self: flex-start; }
-  .purchaseStats { overflow-x: auto; margin-top: 30px; }
-  .purchaseStats div { min-width: 135px; }
+  .purchaseStats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 30px; }
+  .purchaseStats div { min-width: auto; }
+  .purchaseStats div:last-child { grid-column: span 2; }
   .purchasesToolbar { align-items: stretch; flex-direction: column; }
   .purchaseSearch { width: 100%; }
   .filterGroups { justify-content: flex-start; overflow-x: auto; flex-wrap: nowrap; }
