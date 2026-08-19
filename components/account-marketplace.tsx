@@ -40,6 +40,14 @@ export function AccountMarketplace() {
     fetchAccounts()
   }, [])
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const platform = params.get('platform') as Filter | null;
+    if (platform && ["instagram", "facebook", "x", "tiktok"].includes(platform)) {
+      setActive(platform);
+    }
+  }, [])
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     return accounts.filter((a) => {

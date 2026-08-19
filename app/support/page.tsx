@@ -173,13 +173,16 @@ export default function SupportPage() {
               <span className="text-lg font-bold tracking-tight text-white">Travis Pay Support</span>
             </Link>
 
-            {/* Desktop Logout Button */}
-            <button
-              onClick={handleLogout}
-              className="hidden md:block text-muted-foreground hover:text-white text-sm font-medium transition-colors px-4 py-2"
-            >
-              Logout
-            </button>
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-4">
+              <Link href="/" className="text-muted-foreground hover:text-white text-sm font-medium transition-colors px-2">Home</Link>
+              <button
+                onClick={handleLogout}
+                className="text-muted-foreground hover:text-white text-sm font-medium transition-colors px-4 py-2"
+              >
+                Logout
+              </button>
+            </div>
 
             {/* Mobile Menu Toggle */}
             <button
@@ -194,6 +197,12 @@ export default function SupportPage() {
             {/* Mobile Menu Content */}
             {openMenu && (
               <div className="mt-2 rounded-2xl border border-white/10 bg-slate-900/80 p-4 backdrop-blur-xl md:hidden flex flex-col gap-2 shadow-2xl">
+                <Link
+                  href="/"
+                  className="w-full text-left text-muted-foreground hover:text-white px-3 py-2 text-sm font-medium transition-colors"
+                >
+                  Home
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="w-full text-left text-muted-foreground hover:text-white px-3 py-2 text-sm font-medium transition-colors"

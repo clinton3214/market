@@ -9,6 +9,7 @@ import { useAuth } from '@/components/auth-provider'
 import { TravisPayLogo } from '@/components/travis-pay-logo'
 
 const links = [
+  { label: 'Home', href: '/', requiresAuth: false },
   { label: 'Instagram', href: '/accounts?platform=instagram', requiresAuth: false },
   { label: 'Facebook', href: '/accounts?platform=facebook', requiresAuth: false },
   { label: 'X', href: '/accounts?platform=x', requiresAuth: false },

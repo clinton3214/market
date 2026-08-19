@@ -1,6 +1,6 @@
 export const TravisPayLogo = ({ className = "h-8" }: { className?: string }) => (
   <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-    <g transform="translate(2, 4)" fill="#9b4df1">
+    <g transform="translate(2, 4)" fill="currentColor">
       {/* T and P base structure */}
       <path d="M 0 0 H 32 V 6 H 19 V 38 H 11 V 6 H 0 Z" />
       {/* P bowl */}
