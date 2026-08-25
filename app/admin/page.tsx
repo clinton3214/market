@@ -377,7 +377,7 @@ export default function AdminDashboard() {
                        <div className="absolute top-4 right-4 bg-chart-4/20 text-chart-4 text-xs font-bold px-2 py-1 rounded">SOLD</div>
                     )}
                     {account.aliasOfHandle && (
-                      <div className="absolute top-4 right-4 w-2 h-2 bg-yellow-500 rounded-full shadow-sm" title="Alias Listing"></div>
+                      <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 absolute top-4 right-4 ring-2 ring-white/10 shadow-[0_0_10px_rgba(234,179,8,0.5)]"></span>
                     )}
                     <div className="flex items-start justify-between mb-4">
                       <div>
@@ -486,7 +486,7 @@ export default function AdminDashboard() {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-foreground">Alias Of Handle (Optional)</label>
+                <label className="text-sm font-medium text-foreground">apex(optional)</label>
                 <input
                   value={formData.aliasOfHandle}
                   onChange={(e) => setFormData({...formData, aliasOfHandle: e.target.value})}

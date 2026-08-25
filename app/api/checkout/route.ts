@@ -33,11 +33,7 @@ export async function POST(request: Request) {
     const account = await Listing.findOne({ 
       _id: accountId, 
       status: 'available',
-      isSold: { $ne: true },
-      $or: [
-        { reservedUntil: { $exists: false } },
-        { reservedUntil: { $lt: new Date() } }
-      ]
+      isSold: { $ne: true }
     });
     
     console.log('[Checkout API] Found account:', account);
@@ -46,23 +42,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Out of stock", redirectUrl: "/out-of-stock" }, { status: 400 });
     }
 
+    // If reserved by someone else, block it
+    if (account.reservedUntil && account.reservedUntil > new Date() && account.reservedBy !== user._id.toString()) {
+      return NextResponse.json({ error: "Account is currently reserved by another buyer. Please try again later.", redirectUrl: "/out-of-stock" }, { status: 400 });
+    }
+
     let masterHandle = null;
 
     if (account.aliasOfHandle) {
-      // Check and reserve master listing
-      const masterListing = await Listing.findOneAndUpdate(
-        {
+      // Check master listing
+      const masterListing = await Listing.findOne({
           handle: account.aliasOfHandle,
           status: 'available',
-          isSold: { $ne: true },
-          $or: [
-            { reservedUntil: { $exists: false } },
-            { reservedUntil: { $lt: new Date() } }
-          ]
-        },
-        { $set: { reservedUntil: new Date(Date.now() + 15 * 60 * 1000) } },
-        { new: true }
-      );
+          isSold: { $ne: true }
+      });
 
       if (!masterListing) {
         return NextResponse.json({ 
@@ -71,12 +64,25 @@ export async function POST(request: Request) {
         }, { status: 400 });
       }
 
+      if (masterListing.reservedUntil && masterListing.reservedUntil > new Date() && masterListing.reservedBy !== user._id.toString()) {
+        return NextResponse.json({ 
+          error: "Account is currently reserved by another buyer. Please try again later.", 
+          redirectUrl: `/out-of-stock?platform=${account.platform}` 
+        }, { status: 400 });
+      }
+
+      // Reserve the master listing
+      await Listing.updateOne(
+        { _id: masterListing._id },
+        { $set: { reservedUntil: new Date(Date.now() + 2 * 60 * 1000), reservedBy: user._id.toString() } }
+      );
+
       masterHandle = masterListing.handle;
     } else {
       // Reserve the current account if it's not an alias
       await Listing.updateOne(
         { _id: account._id },
-        { $set: { reservedUntil: new Date(Date.now() + 15 * 60 * 1000) } }
+        { $set: { reservedUntil: new Date(Date.now() + 2 * 60 * 1000), reservedBy: user._id.toString() } }
       );
     }
     

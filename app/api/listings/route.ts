@@ -8,14 +8,10 @@ export async function GET(request: Request) {
   try {
     await dbConnect();
     
-    // Fetch only available listings that are not currently reserved, exclude credentials
+    // Fetch only available listings that are not sold, exclude credentials
     const listings = await Listing.find({ 
       status: 'available',
-      isSold: { $ne: true },
-      $or: [
-        { reservedUntil: { $exists: false } },
-        { reservedUntil: { $lt: new Date() } }
-      ]
+      isSold: { $ne: true }
     }).select('-credentials -__v');
     
     // Create a map of available master handles

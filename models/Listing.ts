@@ -14,6 +14,7 @@ const listingSchema = new mongoose.Schema(
     status: { type: String, enum: ['available', 'sold'], default: 'available' },
     aliasOfHandle: { type: String },
     reservedUntil: { type: Date },
+    reservedBy: { type: String },
     isSold: { type: Boolean, default: false },
     
     // SECURE FIELDS (Never sent to the public frontend unless explicitly selected)

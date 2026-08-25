@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     }
 
     const cost_price_ngn = cost_price * exchangeRate;
-    const base_sell = cost_price_ngn + 1500;
+    const base_sell = cost_price_ngn + 100;
     // Round to nearest 50 NGN
     const sell_price = Math.ceil(base_sell / 50) * 50; 
 

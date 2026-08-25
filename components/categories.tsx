@@ -9,35 +9,30 @@ const categories = [
   {
     name: 'Instagram',
     label: 'Aesthetic & niche pages ready to scale',
-    count: '1,240 accounts',
     Icon: InstagramIcon,
     glow: 'group-hover:shadow-[0_0_60px_-12px_rgba(168,85,247,0.55)]',
   },
   {
     name: 'Facebook',
     label: 'Pages, groups & aged profiles',
-    count: '860 accounts',
     Icon: FacebookIcon,
     glow: 'group-hover:shadow-[0_0_60px_-12px_rgba(59,130,246,0.55)]',
   },
   {
     name: 'X',
     label: 'Verified handles & engaged audiences',
-    count: '520 accounts',
     Icon: XIcon,
     glow: 'group-hover:shadow-[0_0_60px_-12px_rgba(148,163,184,0.45)]',
   },
   {
     name: 'TikTok',
     label: 'Channels & active groups',
-    count: '340 accounts',
     Icon: TikTokIcon,
     glow: 'group-hover:shadow-[0_0_60px_-12px_rgba(255,0,80,0.55)]',
   },
   {
     name: 'Foreign Numbers',
     label: 'Virtual numbers for OTP verification',
-    count: 'On-demand',
     Icon: GlobeIcon,
     glow: 'group-hover:shadow-[0_0_60px_-12px_rgba(16,185,129,0.55)]',
     href: '/otp',
@@ -86,9 +81,6 @@ export function Categories() {
             <div className="mt-10">
               <h3 className="text-xl font-semibold">{cat.name}</h3>
               <p className="mt-1 text-sm text-muted-foreground">{cat.label}</p>
-              <p className="mt-4 text-sm font-medium gradient-text">
-                {cat.count}
-              </p>
             </div>
           </a>
         ))}
