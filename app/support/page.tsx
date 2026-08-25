@@ -167,9 +167,7 @@ export default function SupportPage() {
         <div className="mx-auto max-w-5xl">
           <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 shadow-[0_16px_40px_-24px_rgba(0,0,0,0.8)] backdrop-blur-xl sm:px-6">
             <Link href="/" className="flex items-center gap-2.5">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 border border-white/10">
-                <TravisPayLogo className="h-6 w-auto" />
-              </span>
+              <TravisPayLogo className="h-6 w-auto text-purple-500" />
               <span className="text-lg font-bold tracking-tight text-white">Travis Pay Support</span>
             </Link>
 

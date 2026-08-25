@@ -13,6 +13,7 @@ type Credentials = {
   accountPassword?: string
   twoFactorAuth?: string
   backupCode?: string
+  note?: string
 }
 
 type Purchase = {
@@ -198,6 +199,18 @@ export default function PurchasesPage() {
                     <div className={styles.credentialItem}>
                       <span className={styles.credentialLabel}>2FA Key</span>
                       <span className={styles.credentialValue}>{purchase.credentials.twoFactorAuth}</span>
+                    </div>
+                  )}
+                  {purchase.credentials.backupCode && (
+                    <div className={styles.credentialItem}>
+                      <span className={styles.credentialLabel}>Backup Code</span>
+                      <span className={styles.credentialValue}>{purchase.credentials.backupCode}</span>
+                    </div>
+                  )}
+                  {purchase.credentials.note && (
+                    <div className={styles.credentialItem}>
+                      <span className={styles.credentialLabel}>Note</span>
+                      <span className={styles.credentialValue}>{purchase.credentials.note}</span>
                     </div>
                   )}
                 </div>

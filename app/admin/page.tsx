@@ -21,6 +21,7 @@ type Account = {
     accountPassword?: string;
     twoFactorAuth?: string;
     backupCode?: string;
+    note?: string;
   };
   description?: string;
   aliasOfHandle?: string;
@@ -50,6 +51,7 @@ export default function AdminDashboard() {
     accountPassword: '',
     twoFactorAuth: '',
     backupCode: '',
+    note: '',
     description: '',
     aliasOfHandle: '',
   });
@@ -119,6 +121,7 @@ export default function AdminDashboard() {
       accountPassword: account.credentials?.accountPassword || '',
       twoFactorAuth: account.credentials?.twoFactorAuth || '',
       backupCode: account.credentials?.backupCode || '',
+      note: account.credentials?.note || '',
       description: account.description || '',
       aliasOfHandle: account.aliasOfHandle || '',
     });
@@ -128,7 +131,7 @@ export default function AdminDashboard() {
   const closeModal = () => {
     setShowModal(false);
     setEditingId(null);
-    setFormData({ platform: 'instagram', handle: '', followers: '', price: '', accountEmail: '', emailPassword: '', accountUsername: '', accountPassword: '', twoFactorAuth: '', backupCode: '', description: '', aliasOfHandle: '' });
+    setFormData({ platform: 'instagram', handle: '', followers: '', price: '', accountEmail: '', emailPassword: '', accountUsername: '', accountPassword: '', twoFactorAuth: '', backupCode: '', note: '', description: '', aliasOfHandle: '' });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -150,6 +153,7 @@ export default function AdminDashboard() {
           accountPassword: formData.accountPassword,
           twoFactorAuth: formData.twoFactorAuth,
           backupCode: formData.backupCode,
+          note: formData.note,
         },
       };
 
@@ -196,7 +200,7 @@ export default function AdminDashboard() {
   const filteredAccounts = activeFilter === 'all' 
     ? accounts 
     : activeFilter === 'sold'
-    ? accounts.filter(a => a.status === 'sold')
+    ? accounts.filter(a => a.status === 'sold' && !a.aliasOfHandle)
     : accounts.filter((a) => a.platform.toLowerCase() === activeFilter && a.status !== 'sold');
 
   const totalRevenue = accounts.filter(a => a.status === 'sold').reduce((sum, a) => sum + (a.price || 0), 0) + otpRevenue;
@@ -211,9 +215,7 @@ export default function AdminDashboard() {
 
           <div className="mt-4 flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 shadow-[0_16px_40px_-24px_rgba(0,0,0,0.8)] backdrop-blur-xl sm:px-6">
             <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-600/20 text-purple-500">
-                <TravisPayLogo className="h-6 w-auto" />
-              </span>
+              <TravisPayLogo className="h-6 w-auto text-purple-500" />
               <span className="text-lg font-bold tracking-tight text-foreground">Travis Pay</span>
               <span className="text-sm font-bold tracking-widest text-muted-foreground uppercase ml-1">Admin</span>
             </div>
@@ -333,7 +335,7 @@ export default function AdminDashboard() {
               <button
                 onClick={() => {
                   setEditingId(null);
-                  setFormData({ platform: 'instagram', handle: '', followers: '', price: '', accountEmail: '', emailPassword: '', accountUsername: '', accountPassword: '', twoFactorAuth: '', backupCode: '', description: '' });
+                  setFormData({ platform: 'instagram', handle: '', followers: '', price: '', accountEmail: '', emailPassword: '', accountUsername: '', accountPassword: '', twoFactorAuth: '', backupCode: '', note: '', description: '' });
                   setShowModal(true);
                 }}
                 className="bg-gradient-to-r from-primary to-chart-4 text-primary-foreground px-6 py-2 rounded-full hover:opacity-90 transition-all text-sm font-semibold"
@@ -375,18 +377,12 @@ export default function AdminDashboard() {
                        <div className="absolute top-4 right-4 bg-chart-4/20 text-chart-4 text-xs font-bold px-2 py-1 rounded">SOLD</div>
                     )}
                     {account.aliasOfHandle && (
-                      <div className="absolute top-4 right-4 w-3 h-3 bg-yellow-500 rounded-full shadow-sm" title={`Alias of ${account.aliasOfHandle}`}></div>
+                      <div className="absolute top-4 right-4 w-2 h-2 bg-yellow-500 rounded-full shadow-sm" title="Alias Listing"></div>
                     )}
                     <div className="flex items-start justify-between mb-4">
                       <div>
                         <p className="text-muted-foreground text-xs mb-1 uppercase tracking-wider">{account.platform}</p>
                         <h3 className="text-foreground font-semibold">{account.handle}</h3>
-                        {account.aliasOfHandle && <p className="text-xs text-yellow-500 mt-1">Alias of: {account.aliasOfHandle}</p>}
-                        {!account.aliasOfHandle && (
-                          <p className="text-xs text-primary mt-1">
-                            {accounts.filter(a => a.aliasOfHandle === account.handle && a.status !== 'sold').length} active aliases
-                          </p>
-                        )}
                       </div>
                     </div>
 
@@ -565,6 +561,16 @@ export default function AdminDashboard() {
                     type="text"
                     placeholder="8-digit backup code"
                     className="w-full bg-secondary border border-border rounded-lg px-3 py-2.5 text-foreground mt-1 focus:outline-none focus:border-primary"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground">Note (Optional)</label>
+                  <textarea
+                    value={formData.note}
+                    onChange={(e) => setFormData({...formData, note: e.target.value})}
+                    placeholder="Any extra instructions or notes for the buyer..."
+                    rows={2}
+                    className="w-full bg-secondary border border-border rounded-lg px-3 py-2.5 text-foreground mt-1 focus:outline-none focus:border-primary resize-none"
                   />
                 </div>
               </div>

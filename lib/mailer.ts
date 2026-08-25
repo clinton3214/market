@@ -103,6 +103,7 @@ Associated Email: ${accountDetails.credentials?.accountEmail || 'N/A'}
 Email Password: ${accountDetails.credentials?.emailPassword || 'N/A'}
 ${accountDetails.credentials?.twoFactorAuth ? `2FA String: ${accountDetails.credentials.twoFactorAuth}\n(Paste this string into 2fa.live to get your 6-digit login code)` : ''}
 ${accountDetails.credentials?.backupCode ? `Backup Code: ${accountDetails.credentials.backupCode}` : ''}
+${accountDetails.credentials?.note ? `Note: ${accountDetails.credentials.note}` : ''}
 ------------------------------
   `;
 

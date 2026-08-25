@@ -38,9 +38,7 @@ export function AuthShell({ title, subtitle, badge, children, footer }: AuthShel
               href="/"
               className="mb-6 flex items-center gap-2.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 backdrop-blur"
             >
-              <span className="flex size-6 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <TravisPayLogo className="size-3.5" />
-              </span>
+              <TravisPayLogo className="size-4 text-purple-500" />
               <span className="text-sm font-semibold tracking-tight">Travis Pay</span>
             </Link>
 

@@ -213,9 +213,7 @@ export default function AdminSupportPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mt-4 flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 shadow-[0_16px_40px_-24px_rgba(0,0,0,0.8)] backdrop-blur-xl sm:px-6">
             <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5">
-                <TravisPayLogo className="h-6 w-auto" />
-              </span>
+              <TravisPayLogo className="h-6 w-auto text-purple-500" />
               <span className="text-lg font-bold tracking-tight text-foreground hidden sm:inline">Travis Pay</span>
               <span className="text-sm font-bold tracking-widest text-muted-foreground uppercase ml-1">Admin</span>
               <span className="ml-2 text-[10px] sm:text-xs bg-purple-500/20 text-purple-400 border border-purple-500/30 px-2.5 py-0.5 rounded-full font-medium whitespace-nowrap">

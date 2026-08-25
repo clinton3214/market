@@ -24,6 +24,7 @@ const listingSchema = new mongoose.Schema(
       accountPassword: { type: String },
       twoFactorAuth: { type: String },
       backupCode: { type: String },
+      note: { type: String },
     },
     
     // Purchase tracking

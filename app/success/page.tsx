@@ -49,15 +49,27 @@ Platform: ${details.platform} (${details.handle})
 Account Username: ${creds.accountUsername || details.handle}
 Account Password: ${creds.accountPassword || 'N/A'}
 Associated Email: ${creds.accountEmail || 'N/A'}
-Email Password: ${creds.emailPassword || 'N/A'}
-${creds.twoFactorAuth ? `\n2FA String: ${creds.twoFactorAuth}\n(Paste this string into 2fa.live to get your 6-digit login code)` : ''}
-${creds.backupCode ? `\nBackup Code: ${creds.backupCode}` : ''}
+Email Password: ${creds.emailPassword || 'N/A'}`;
+
+    if (creds.twoFactorAuth) {
+      content += `\n2FA String: ${creds.twoFactorAuth}\n(Use 2fa.live to get code)`;
+    }
+    
+    if (creds.backupCode) {
+      content += `\nBackup Code: ${creds.backupCode}`;
+    }
+
+    if (creds.note) {
+      content += `\nNote: ${creds.note}`;
+    }
+
+    content += `
 
 Thank you for your purchase via Travis Pay!
 ------------------------------
     `.trim();
 
-    const blob = new Blob([textContent], { type: 'text/plain' });
+    const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -118,7 +130,7 @@ Thank you for your purchase via Travis Pay!
               <p className="text-foreground break-all">{details.credentials.emailPassword || 'N/A'}</p>
             </div>
             
-            {(details.credentials.twoFactorAuth || details.credentials.backupCode) && (
+            {(details.credentials.twoFactorAuth || details.credentials.backupCode || details.credentials.note) && (
               <>
                 <hr className="border-border/50" />
                 {details.credentials.twoFactorAuth && (
@@ -131,9 +143,15 @@ Thank you for your purchase via Travis Pay!
                   </div>
                 )}
                 {details.credentials.backupCode && (
-                  <div>
-                    <span className="text-muted-foreground">Backup Code:</span>
+                  <div className="mb-4">
+                    <p className="text-sm text-muted-foreground uppercase tracking-wider mb-1">Backup Code</p>
                     <p className="text-foreground break-all">{details.credentials.backupCode}</p>
+                  </div>
+                )}
+                {details.credentials.note && (
+                  <div className="mb-4">
+                    <p className="text-sm text-muted-foreground uppercase tracking-wider mb-1">Note</p>
+                    <p className="text-foreground break-all">{details.credentials.note}</p>
                   </div>
                 )}
               </>

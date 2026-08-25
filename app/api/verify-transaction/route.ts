@@ -31,6 +31,8 @@ export async function GET(request: Request) {
 
     if (data && data.status && data.data.status === 'success') {
       const accountId = data.data.metadata?.account_id;
+      const masterHandle = data.data.metadata?.master_handle;
+      const aliasHandle = data.data.metadata?.alias_handle;
 
       if (!accountId) {
         return NextResponse.json({ error: "Account ID not found in transaction" }, { status: 400 });
@@ -43,29 +45,60 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: "Account not found in database" }, { status: 404 });
       }
 
+      let credentialsToReturn = account.credentials;
+      let accountDetailsToEmail = account;
+
       // If the webhook hasn't fired yet, we can mark it as sold here too
       if (account.status === 'available') {
         account.status = 'sold';
+        account.isSold = true;
         if (data.data.customer?.email) {
           account.buyerEmail = data.data.customer.email;
         }
         account.purchasedAt = new Date();
         await account.save();
         
+        if (masterHandle) {
+          // Mark master and all its aliases as sold
+          await Listing.updateMany(
+            { $or: [{ handle: masterHandle }, { aliasOfHandle: masterHandle }] },
+            { $set: { status: 'sold', isSold: true } }
+          );
+
+          // Fetch master listing to get credentials
+          const masterListing = await Listing.findOne({ handle: masterHandle });
+          if (masterListing) {
+            credentialsToReturn = masterListing.credentials;
+            accountDetailsToEmail = {
+              ...masterListing.toObject(),
+              handle: aliasHandle,
+              platform: account.platform
+            };
+          }
+        }
+
         // Also trigger the email securely from the backend so it works locally without webhook
         if (data.data.customer?.email) {
           try {
-            await sendAccountCredentialsEmail(data.data.customer.email, account);
+            await sendAccountCredentialsEmail(data.data.customer.email, accountDetailsToEmail);
             console.log(`[Delivery] Account ${accountId} sold and email sent to ${data.data.customer.email}`);
           } catch(e) {
             console.error('Failed to send email:', e);
           }
         }
+      } else {
+         // If it is already sold (webhook beat us), we still need to return correct credentials
+         if (masterHandle) {
+            const masterListing = await Listing.findOne({ handle: masterHandle });
+            if (masterListing) {
+              credentialsToReturn = masterListing.credentials;
+            }
+         }
       }
 
       return NextResponse.json({
         success: true,
-        credentials: account.credentials,
+        credentials: credentialsToReturn,
         platform: account.platform,
         handle: account.handle
       });

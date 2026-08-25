@@ -17,7 +17,11 @@ export async function GET(request: Request) {
 
   try {
     await dbConnect();
-    const listings = await Listing.find({}).sort({ createdAt: -1 });
+    const listings = await Listing.find({
+      $nor: [
+        { status: 'sold', aliasOfHandle: { $exists: true, $ne: '' } }
+      ]
+    }).sort({ createdAt: -1 });
     return NextResponse.json(listings);
   } catch (error) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
