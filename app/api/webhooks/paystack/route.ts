@@ -97,9 +97,11 @@ export async function POST(request: Request) {
         let accountDetailsToEmail = account;
 
         if (masterHandle) {
-          // Mark master and all its aliases as sold
+          const handlesToUpdate = [masterHandle];
+          if (aliasHandle) handlesToUpdate.push(aliasHandle);
+
           await Listing.updateMany(
-            { $or: [{ handle: masterHandle }, { aliasOfHandle: masterHandle }] },
+            { handle: { $in: handlesToUpdate } },
             { $set: { status: 'sold', isSold: true } }
           );
 
