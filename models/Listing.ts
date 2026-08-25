@@ -12,6 +12,9 @@ const listingSchema = new mongoose.Schema(
     engagement: { type: String },
     description: { type: String },
     status: { type: String, enum: ['available', 'sold'], default: 'available' },
+    aliasOfHandle: { type: String },
+    reservedUntil: { type: Date },
+    isSold: { type: Boolean, default: false },
     
     // SECURE FIELDS (Never sent to the public frontend unless explicitly selected)
     credentials: {

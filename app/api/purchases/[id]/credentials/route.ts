@@ -41,9 +41,18 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Credentials expired" }, { status: 410 });
     }
 
+    let credentialsToReturn = purchase.credentials;
+
+    if (purchase.aliasOfHandle) {
+      const masterListing = await Listing.findOne({ handle: purchase.aliasOfHandle });
+      if (masterListing && masterListing.credentials) {
+        credentialsToReturn = masterListing.credentials;
+      }
+    }
+
     return NextResponse.json({ 
       success: true, 
-      credentials: purchase.credentials 
+      credentials: credentialsToReturn 
     });
   } catch (error) {
     console.error('Credentials API Error:', error);

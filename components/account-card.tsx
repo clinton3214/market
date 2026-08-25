@@ -27,6 +27,8 @@ export function AccountCard({ account }: { account: Account }) {
       const data = await res.json()
       if (data.checkoutUrl) {
         window.location.href = data.checkoutUrl
+      } else if (data.redirectUrl) {
+        window.location.href = data.redirectUrl
       } else {
         alert(data.error || 'Checkout failed')
         setLoading(false)

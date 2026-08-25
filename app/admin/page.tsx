@@ -23,6 +23,7 @@ type Account = {
     backupCode?: string;
   };
   description?: string;
+  aliasOfHandle?: string;
 };
 
 export default function AdminDashboard() {
@@ -50,6 +51,7 @@ export default function AdminDashboard() {
     twoFactorAuth: '',
     backupCode: '',
     description: '',
+    aliasOfHandle: '',
   });
 
   useEffect(() => {
@@ -118,6 +120,7 @@ export default function AdminDashboard() {
       twoFactorAuth: account.credentials?.twoFactorAuth || '',
       backupCode: account.credentials?.backupCode || '',
       description: account.description || '',
+      aliasOfHandle: account.aliasOfHandle || '',
     });
     setShowModal(true);
   };
@@ -125,7 +128,7 @@ export default function AdminDashboard() {
   const closeModal = () => {
     setShowModal(false);
     setEditingId(null);
-    setFormData({ platform: 'instagram', handle: '', followers: '', price: '', accountEmail: '', emailPassword: '', accountUsername: '', accountPassword: '', twoFactorAuth: '', backupCode: '', description: '' });
+    setFormData({ platform: 'instagram', handle: '', followers: '', price: '', accountEmail: '', emailPassword: '', accountUsername: '', accountPassword: '', twoFactorAuth: '', backupCode: '', description: '', aliasOfHandle: '' });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -137,6 +140,7 @@ export default function AdminDashboard() {
         followers: formData.followers,
         price: Number(formData.price),
         description: formData.description,
+        aliasOfHandle: formData.aliasOfHandle,
         status: 'available',
         verified: true,
         credentials: {
@@ -207,7 +211,7 @@ export default function AdminDashboard() {
 
           <div className="mt-4 flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 shadow-[0_16px_40px_-24px_rgba(0,0,0,0.8)] backdrop-blur-xl sm:px-6">
             <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-600/20 text-purple-500">
                 <TravisPayLogo className="h-6 w-auto" />
               </span>
               <span className="text-lg font-bold tracking-tight text-foreground">Travis Pay</span>
@@ -370,10 +374,19 @@ export default function AdminDashboard() {
                     {account.status === 'sold' && (
                        <div className="absolute top-4 right-4 bg-chart-4/20 text-chart-4 text-xs font-bold px-2 py-1 rounded">SOLD</div>
                     )}
+                    {account.aliasOfHandle && (
+                      <div className="absolute top-4 right-4 w-3 h-3 bg-yellow-500 rounded-full shadow-sm" title={`Alias of ${account.aliasOfHandle}`}></div>
+                    )}
                     <div className="flex items-start justify-between mb-4">
                       <div>
                         <p className="text-muted-foreground text-xs mb-1 uppercase tracking-wider">{account.platform}</p>
                         <h3 className="text-foreground font-semibold">{account.handle}</h3>
+                        {account.aliasOfHandle && <p className="text-xs text-yellow-500 mt-1">Alias of: {account.aliasOfHandle}</p>}
+                        {!account.aliasOfHandle && (
+                          <p className="text-xs text-primary mt-1">
+                            {accounts.filter(a => a.aliasOfHandle === account.handle && a.status !== 'sold').length} active aliases
+                          </p>
+                        )}
                       </div>
                     </div>
 
@@ -383,7 +396,10 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className="flex gap-2 mt-4 pt-4 border-t border-border">
-                      <button onClick={() => handleEdit(account)} className="flex-1 bg-secondary hover:bg-secondary/80 text-foreground px-3 py-2 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
+                      <button 
+                        onClick={() => handleEdit(account)} 
+                        disabled={account.aliasOfHandle ? !accounts.some(a => a.handle === account.aliasOfHandle && a.status !== 'sold') : false}
+                        className="flex-1 bg-secondary hover:bg-secondary/80 disabled:opacity-50 disabled:cursor-not-allowed text-foreground px-3 py-2 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
                         <Edit2 className="w-4 h-4" /> Edit
                       </button>
                       <button onClick={() => handleDelete(account.id)} className="flex-1 bg-destructive/10 hover:bg-destructive/20 text-destructive px-3 py-2 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
@@ -470,6 +486,17 @@ export default function AdminDashboard() {
                   placeholder="Enter a brief description of the account..."
                   rows={3}
                   className="w-full bg-secondary border border-border rounded-lg px-3 py-2.5 text-foreground mt-1 focus:outline-none focus:border-primary resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-foreground">Alias Of Handle (Optional)</label>
+                <input
+                  value={formData.aliasOfHandle}
+                  onChange={(e) => setFormData({...formData, aliasOfHandle: e.target.value})}
+                  type="text"
+                  placeholder="Master Listing Handle"
+                  className="w-full bg-secondary border border-border rounded-lg px-3 py-2.5 text-foreground mt-1 focus:outline-none focus:border-primary"
                 />
               </div>
 

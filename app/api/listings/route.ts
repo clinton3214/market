@@ -8,13 +8,25 @@ export async function GET(request: Request) {
   try {
     await dbConnect();
     
-    // Fetch only available listings, exclude credentials
-    const listings = await Listing.find({ status: 'available' }).select('-credentials -__v');
+    // Fetch only available listings that are not currently reserved, exclude credentials
+    const listings = await Listing.find({ 
+      status: 'available',
+      isSold: { $ne: true },
+      $or: [
+        { reservedUntil: { $exists: false } },
+        { reservedUntil: { $lt: new Date() } }
+      ]
+    }).select('-credentials -__v');
     
-    const formattedListings = listings.map(l => ({
-      ...l.toObject(),
-      id: l._id.toString()
-    }));
+    // Create a map of available master handles
+    const availableHandles = new Set(listings.map(l => l.handle));
+
+    const formattedListings = listings
+      .filter(l => !l.aliasOfHandle || availableHandles.has(l.aliasOfHandle))
+      .map(l => ({
+        ...l.toObject(),
+        id: l._id.toString()
+      }));
 
     return NextResponse.json(formattedListings);
   } catch (error) {

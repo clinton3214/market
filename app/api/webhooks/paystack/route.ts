@@ -73,6 +73,8 @@ export async function POST(request: Request) {
       }
 
       const accountId = event.data.metadata?.account_id;
+      const masterHandle = event.data.metadata?.master_handle;
+      const aliasHandle = event.data.metadata?.alias_handle;
       const buyerEmail = event.data.customer?.email;
 
       if (!accountId || !buyerEmail) {
@@ -85,14 +87,36 @@ export async function POST(request: Request) {
       
       if (account && account.status === 'available') {
         account.status = 'sold';
+        account.isSold = true;
         account.buyerEmail = buyerEmail;
         account.purchasedAt = new Date();
         await account.save();
         
         console.log(`[Delivery] Account ${accountId} sold to ${buyerEmail}!`);
         
+        let accountDetailsToEmail = account;
+
+        if (masterHandle) {
+          // Mark master and all its aliases as sold
+          await Listing.updateMany(
+            { $or: [{ handle: masterHandle }, { aliasOfHandle: masterHandle }] },
+            { $set: { status: 'sold', isSold: true } }
+          );
+
+          // Fetch master listing to get credentials
+          const masterListing = await Listing.findOne({ handle: masterHandle });
+          if (masterListing) {
+            // Override handle to what the buyer purchased
+            accountDetailsToEmail = {
+              ...masterListing.toObject(),
+              handle: aliasHandle,
+              platform: account.platform
+            };
+          }
+        }
+        
         // Send email with credentials
-        await sendAccountCredentialsEmail(buyerEmail, account);
+        await sendAccountCredentialsEmail(buyerEmail, accountDetailsToEmail);
       }
     }
 

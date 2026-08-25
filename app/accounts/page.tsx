@@ -1,6 +1,7 @@
 import { BadgeCheck } from "lucide-react"
 import { SiteHeader } from "@/components/site-header"
 import { AccountMarketplace } from "@/components/account-marketplace"
+import { FloatingBanner } from "@/components/floating-banner"
 
 export default function Page() {
   return (
@@ -33,6 +34,7 @@ export default function Page() {
           </p>
         </div>
       </footer>
+      <FloatingBanner />
     </div>
   )
 }
