@@ -19,70 +19,81 @@ export default function OtpStatusPage() {
   useEffect(() => {
     if (!id) return;
     
-    // Retrieve the token saved before checkout
-    const wsToken = localStorage.getItem(`otp_order_${id}`);
-    if (!wsToken) {
-      setError("No authorization token found for this order. It may have been started on another device.");
-      return;
-    }
+    let socket: Socket | null = null;
 
-    // Connect to WebSocket server (server.js on port 5000)
-    // If NEXT_PUBLIC_BACKEND_URL is set, use that, else assume same host on port 5000
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL 
-      ? `https://${process.env.NEXT_PUBLIC_BACKEND_URL}` 
-      : 'http://localhost:5000';
+    const initialize = async () => {
+      try {
+        // Try to get token from localStorage as fallback, but rely on API first
+        const localWsToken = localStorage.getItem(`otp_order_${id}`);
+        const fetchUrl = localWsToken ? `/api/otp/status/${id}?wsToken=${localWsToken}` : `/api/otp/status/${id}`;
+        
+        const res = await fetch(fetchUrl);
+        const data = await res.json();
+        
+        if (!res.ok) {
+          setError(data.error || "Failed to load order. Make sure you are logged in or using the original device.");
+          return;
+        }
 
-    const socket = io(backendUrl);
-    socketRef.current = socket;
-
-    socket.on('connect', () => {
-      socket.emit('join_order', { orderId: id, wsToken });
-    });
-
-    socket.on('status_update', (data) => {
-      if (data.error) setError(data.error);
-      if (data.status) setStatus(data.status);
-      if (data.phone_number) setPhoneNumber(data.phone_number);
-      if (data.otp_code) setOtpCode(data.otp_code);
-      if (data.full_sms_text) setFullSms(data.full_sms_text);
-      if (data.expires_at) setExpiresAt(data.expires_at);
-      
-      if (['code_delivered', 'completed', 'failed_no_stock', 'failed_timeout', 'refunded'].includes(data.status)) {
-        socket.disconnect(); // Terminate connection if terminal state
-      }
-    });
-
-    socket.on('error', (msg) => {
-      setError(msg);
-      // Fallback to REST API if WS fails auth but REST might work (e.g., token ok but WS blocked)
-      fetchStatusFallback(wsToken);
-    });
-
-    socket.on('disconnect', () => {
-      // WS dropped, let's poll fallback once just to be sure we have latest state
-      fetchStatusFallback(wsToken);
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, [id]);
-
-  const fetchStatusFallback = async (token: string) => {
-    try {
-      const res = await fetch(`/api/otp/status/${id}?wsToken=${token}`);
-      const data = await res.json();
-      if (res.ok) {
-        setStatus(data.status);
+        // Update state with current data
+        if (data.status) setStatus(data.status);
         if (data.phone_number) setPhoneNumber(data.phone_number);
         if (data.otp_code) setOtpCode(data.otp_code);
         if (data.full_sms_text) setFullSms(data.full_sms_text);
         if (data.expires_at) setExpiresAt(data.expires_at);
+
+        const wsToken = data.wsToken || localWsToken;
+        if (!wsToken) {
+          setError("No authorization token found for real-time updates.");
+          return;
+        }
+
+        // Connect to WebSocket server (server.js on port 5000)
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL 
+          ? `https://${process.env.NEXT_PUBLIC_BACKEND_URL}` 
+          : 'http://localhost:5000';
+
+        socket = io(backendUrl);
+        socketRef.current = socket;
+
+        socket.on('connect', () => {
+          socket?.emit('join_order', { orderId: id, wsToken });
+        });
+
+        socket.on('status_update', (updateData) => {
+          if (updateData.error) setError(updateData.error);
+          if (updateData.status) setStatus(updateData.status);
+          if (updateData.phone_number) setPhoneNumber(updateData.phone_number);
+          if (updateData.otp_code) setOtpCode(updateData.otp_code);
+          if (updateData.full_sms_text) setFullSms(updateData.full_sms_text);
+          if (updateData.expires_at) setExpiresAt(updateData.expires_at);
+          
+          if (['code_delivered', 'completed', 'failed_no_stock', 'failed_timeout', 'refunded'].includes(updateData.status)) {
+            socket?.disconnect(); // Terminate connection if terminal state
+          }
+        });
+
+        socket.on('error', (msg) => {
+          setError(msg);
+          // Fallback fetch is not needed here as we just did it, but could poll if desired
+        });
+        
+      } catch (err) {
+        console.error("Initialization failed", err);
+        setError("Network error loading status.");
       }
-    } catch (err) {
-      console.error("Fallback fetch failed", err);
-    }
-  };
+    };
+
+    initialize();
+
+    return () => {
+      if (socket) socket.disconnect();
+    };
+  }, [id]);
+
+  // We can safely remove fetchStatusFallback as we do it on mount, 
+  // but if we want to keep it, we could reimplement it. Since WS dropped isn't crucial 
+  // to poll immediately if we already did it on mount, let's just leave it out for simplicity.
 
   useEffect(() => {
     if (!expiresAt) return;

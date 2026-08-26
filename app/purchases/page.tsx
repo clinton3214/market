@@ -23,9 +23,10 @@ type Purchase = {
   handle: string
   date?: string
   price: number
-  status: 'available' | 'sold'
+  status: 'available' | 'sold' | string
   purchasedAt: string
   credentials?: Credentials
+  isOtp?: boolean
 }
 
 function PlatformIcon({ type }: { type: string }) {
@@ -117,8 +118,8 @@ export default function PurchasesPage() {
       </div>
       
       <div className={styles.purchaseStats}>
-        <div><strong>{purchases.length}</strong><span>Total accounts</span></div>
-        <div><strong>{purchases.filter(p => p.status === 'sold').length}</strong><span>Delivered</span></div>
+        <div><strong>{purchases.length}</strong><span>Total orders</span></div>
+        <div><strong>{purchases.filter(p => !p.isOtp && p.status === 'sold').length}</strong><span>Delivered Accounts</span></div>
         <div><strong>₦{purchases.reduce((acc, p) => acc + (p.price || 0), 0).toLocaleString()}</strong><span>Total spent</span></div>
       </div>
       
@@ -146,7 +147,11 @@ export default function PurchasesPage() {
               <div className={styles.purchaseInfo}>
                 <div className={styles.purchaseTitleRow}>
                   <h2>{purchase.platform}</h2>
-                  <span className={`${styles.purchaseStatus} ${styles.delivered}`}>Delivered</span>
+                  {purchase.isOtp ? (
+                    <span className={`${styles.purchaseStatus} ${styles.delivered}`}>{purchase.status.replace('_', ' ')}</span>
+                  ) : (
+                    <span className={`${styles.purchaseStatus} ${styles.delivered}`}>Delivered</span>
+                  )}
                 </div>
                 <p>{purchase.category} · Order {purchase.id.slice(-6)}</p>
                 <strong className={styles.purchaseAccount}>{purchase.handle}</strong>
@@ -158,7 +163,11 @@ export default function PurchasesPage() {
                 <div><span>Purchased</span><strong>{new Date(purchase.purchasedAt).toLocaleDateString()}</strong></div>
                 <div><span>Price</span><strong>₦{purchase.price.toLocaleString()}</strong></div>
                 
-                {isMasked ? (
+                {purchase.isOtp ? (
+                  <Link href={`/otp/status/${purchase.id}`} className={styles.copyButton} style={{ textDecoration: 'none', textAlign: 'center' }}>
+                    Track / Get Code
+                  </Link>
+                ) : isMasked ? (
                   <button className={styles.copyButton} onClick={() => revealCredentials(purchase.id)} disabled={revealing === purchase.id}>
                     {revealing === purchase.id ? 'Revealing...' : 'Reveal Credentials'}
                   </button>
@@ -169,7 +178,7 @@ export default function PurchasesPage() {
                 )}
               </div>
               
-              {!isMasked && purchase.credentials && (
+              {!purchase.isOtp && !isMasked && purchase.credentials && (
                 <div className={styles.credentialsPanel}>
                   {purchase.credentials.accountUsername && (
                     <div className={styles.credentialItem}>

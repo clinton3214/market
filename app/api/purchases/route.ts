@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import dbConnect from '@/lib/mongodb';
 import Listing from '@/models/Listing';
+import OtpOrder from '@/models/OtpOrder';
 import User from '@/models/User';
 
 export const dynamic = 'force-dynamic';
@@ -55,7 +56,29 @@ export async function GET(request: Request) {
       };
     });
 
-    return NextResponse.json({ purchases: maskedPurchases });
+    // Fetch OTP Orders
+    const otpOrders = await OtpOrder.find({
+      customer_email: user.email
+    }).sort({ createdAt: -1 });
+
+    const mappedOtpOrders = otpOrders.map((order) => {
+      const o = order.toJSON();
+      return {
+        id: o._id,
+        platform: o.service,
+        handle: o.phone_number || o.country,
+        category: 'Foreign Number',
+        price: o.amount,
+        status: o.status, // Can be 'pending_payment', 'paid', 'purchasing', 'code_delivered', etc.
+        purchasedAt: o.createdAt || new Date(),
+        isOtp: true,
+      };
+    });
+
+    const combinedPurchases = [...maskedPurchases, ...mappedOtpOrders]
+      .sort((a, b) => new Date(b.purchasedAt).getTime() - new Date(a.purchasedAt).getTime());
+
+    return NextResponse.json({ purchases: combinedPurchases });
   } catch (error) {
     console.error('Purchases API Error:', error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
