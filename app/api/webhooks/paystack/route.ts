@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import dbConnect from '@/lib/mongodb';
 import Listing from '@/models/Listing';
+import OtpOrder from '@/models/OtpOrder';
 import { sendAccountCredentialsEmail } from '@/lib/mailer';
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
@@ -34,7 +35,6 @@ export async function POST(request: Request) {
         if (!orderId) return NextResponse.json({ error: "Missing order_id" }, { status: 400 });
 
         await dbConnect();
-        const OtpOrder = require('@/models/OtpOrder').default;
         
         const order = await OtpOrder.findById(orderId);
         
