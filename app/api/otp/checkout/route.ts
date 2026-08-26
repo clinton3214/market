@@ -50,7 +50,7 @@ export async function POST(request: Request) {
 
     await order.save();
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const appUrl = request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     // 4. Initialize Paystack transaction
     const params = {
       email,
