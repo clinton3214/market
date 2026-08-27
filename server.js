@@ -138,7 +138,21 @@ const server = http.createServer((req, res) => {
         res.end(JSON.stringify({ success: true }));
         
         // Detached async execution
-        processOtpPurchase(orderId).catch(console.error);
+        // Check if the frontend already did the 5sim purchase
+        const freshOrder = await OtpOrder.findById(orderId);
+        if (freshOrder && freshOrder.status === 'awaiting_sms' && freshOrder.five_sim_order_id) {
+          // Frontend already bought the number, just start polling for SMS
+          console.log(`[server.js] Order ${orderId} already in awaiting_sms, starting poll loop`);
+          pushWsUpdate(orderId, { 
+            status: freshOrder.status, 
+            phone_number: freshOrder.phone_number,
+            expires_at: freshOrder.expires_at 
+          });
+          startPollingLoop(orderId, freshOrder.five_sim_order_id, freshOrder.expires_at);
+        } else {
+          // Fallback: do the full purchase (in case frontend didn't handle it)
+          processOtpPurchase(orderId).catch(console.error);
+        }
       } catch (err) {
         res.writeHead(400);
         res.end("Bad Request");
@@ -213,8 +227,7 @@ async function processOtpPurchase(orderId) {
       order.status = 'failed_no_stock';
       order.state_transitions.push({ status: 'failed_no_stock', timestamp: new Date(), note: 'Insufficient 5sim balance' });
       await order.save();
-      await refundPaystack(order.paystack_reference, order.sell_price * 100);
-      pushWsUpdate(orderId, { status: order.status, error: "Service unavailable, payment refunded." });
+      pushWsUpdate(orderId, { status: order.status, error: "Service unavailable. Please contact support for a refund." });
       return;
     }
 
@@ -226,8 +239,7 @@ async function processOtpPurchase(orderId) {
       order.status = 'failed_no_stock';
       order.state_transitions.push({ status: 'failed_no_stock', timestamp: new Date(), note: '5sim buy failed' });
       await order.save();
-      await refundPaystack(order.paystack_reference, order.sell_price * 100);
-      pushWsUpdate(orderId, { status: order.status, error: "Out of stock, payment refunded." });
+      pushWsUpdate(orderId, { status: order.status, error: "Out of stock. Please contact support for a refund." });
       return;
     }
 
@@ -249,6 +261,17 @@ async function processOtpPurchase(orderId) {
     startPollingLoop(orderId, order.five_sim_order_id, order.expires_at);
   } catch (error) {
     console.error(`Error processing OTP order ${orderId}:`, error);
+    try {
+      const failedOrder = await OtpOrder.findById(orderId);
+      if (failedOrder && failedOrder.status === 'purchasing') {
+        failedOrder.status = 'failed_no_stock';
+        failedOrder.state_transitions.push({ status: 'failed_no_stock', timestamp: new Date(), note: `System error: ${error.message}` });
+        await failedOrder.save();
+        pushWsUpdate(orderId, { status: failedOrder.status, error: "Order failed. Please contact support for a refund." });
+      }
+    } catch (dbError) {
+       console.error(`Failed to update order ${orderId} after error:`, dbError);
+    }
   }
 }
 
@@ -268,8 +291,7 @@ async function pollFiveSim(orderId, fiveSimOrderId, expiresAt, attempt = 1) {
       order.status = 'failed_timeout';
       order.state_transitions.push({ status: 'failed_timeout', timestamp: new Date(), note: '15 min timeout' });
       await order.save();
-      await refundPaystack(order.paystack_reference, order.sell_price * 100);
-      pushWsUpdate(orderId, { status: order.status, error: "Timeout reached, payment refunded." });
+      pushWsUpdate(orderId, { status: order.status, error: "Timeout reached. Please contact support for a refund." });
       return;
     }
 
@@ -279,8 +301,7 @@ async function pollFiveSim(orderId, fiveSimOrderId, expiresAt, attempt = 1) {
       order.status = 'failed_timeout';
       order.state_transitions.push({ status: 'failed_timeout', timestamp: new Date(), note: `5sim status: ${statusResult.status}` });
       await order.save();
-      await refundPaystack(order.paystack_reference, order.sell_price * 100);
-      pushWsUpdate(orderId, { status: order.status, error: `Order failed (${statusResult.status}), payment refunded.` });
+      pushWsUpdate(orderId, { status: order.status, error: `Order failed (${statusResult.status}). Please contact support for a refund.` });
       return;
     }
 
@@ -344,7 +365,6 @@ async function resumeInFlightOrders() {
         order.status = 'failed_no_stock';
         order.state_transitions.push({ status: 'failed_no_stock', timestamp: new Date(), note: 'Crashed during purchasing phase' });
         await order.save();
-        await refundPaystack(order.paystack_reference, order.sell_price * 100);
       } else if (order.five_sim_order_id && order.expires_at) {
         // Resume polling
         startPollingLoop(order._id, order.five_sim_order_id, order.expires_at);

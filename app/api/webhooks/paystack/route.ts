@@ -43,9 +43,13 @@ export async function POST(request: Request) {
           order.status = 'paid';
           await order.save();
           
-          console.log(`[OTP] Order ${orderId} paid successfully!`);
+          // Execute 5sim purchase directly in frontend
+          const { executeOtpPurchase } = await import('@/lib/otpLogic');
+          await executeOtpPurchase(orderId);
           
-          // Trigger the detached background process on server.js
+          console.log(`[OTP] Order ${orderId} paid and 5sim triggered successfully!`);
+          
+          // Trigger the detached background process on server.js to poll for SMS
           const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ? `https://${process.env.NEXT_PUBLIC_BACKEND_URL}` : 'http://localhost:5000';
           const triggerBackend = async (retries = 3) => {
             for (let i = 0; i < retries; i++) {

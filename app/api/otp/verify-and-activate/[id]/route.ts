@@ -63,9 +63,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
     await freshOrder.save();
 
-    console.log(`[OTP Verify-Activate] Order ${id} verified and marked paid via client fallback`);
+    // Execute 5sim purchase directly in frontend
+    const { executeOtpPurchase } = await import('@/lib/otpLogic');
+    await executeOtpPurchase(id);
 
-    // Trigger the backend server.js to start purchasing
+    console.log(`[OTP Verify-Activate] Order ${id} verified, paid, and 5sim triggered via client fallback`);
+
+    // Trigger the backend server.js to start polling
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL
       ? `https://${process.env.NEXT_PUBLIC_BACKEND_URL}`
       : 'http://localhost:5000';
@@ -92,8 +96,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     // Fire and forget - don't block the response
     triggerBackend();
 
+    // Return the actual current state of the order after purchase attempt
+    const updatedOrder = await OtpOrder.findById(id);
     return NextResponse.json({
-      status: 'paid',
+      status: updatedOrder?.status || 'paid',
+      phone_number: updatedOrder?.phone_number,
+      expires_at: updatedOrder?.expires_at,
       activated: true,
     });
   } catch (error) {
