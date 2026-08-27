@@ -4,9 +4,9 @@ import dbConnect from '@/lib/mongodb';
 import OtpOrder from '@/models/OtpOrder';
 import User from '@/models/User';
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     // Use URL search params to extract wsToken (for legacy/guest access)
     const url = new URL(request.url);
