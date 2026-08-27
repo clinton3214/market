@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
-import { useParams } from 'next/navigation';
+import { useEffect, useState, useRef, useCallback, Suspense } from 'react';
+import { useParams, useSearchParams } from 'next/navigation';
 import { io, Socket } from 'socket.io-client';
-import { Loader2, CheckCircle2, XCircle, Clock, Smartphone, Copy } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, Clock, Smartphone, Copy, Check } from 'lucide-react';
 
-export default function OtpStatusPage() {
+function OtpStatusContent() {
   const { id } = useParams() as { id: string };
+  const searchParams = useSearchParams();
   const [status, setStatus] = useState('pending_payment');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otpCode, setOtpCode] = useState('');
@@ -14,73 +15,154 @@ export default function OtpStatusPage() {
   const [expiresAt, setExpiresAt] = useState('');
   const [error, setError] = useState('');
   const [timeLeft, setTimeLeft] = useState('');
+  const [copied, setCopied] = useState('');
   const socketRef = useRef<Socket | null>(null);
+  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const verifyAttemptedRef = useRef(false);
+
+  // Extract Paystack reference from callback URL
+  const paystackReference = searchParams.get('reference') || searchParams.get('trxref') || '';
+
+  const applyUpdate = useCallback((data: any) => {
+    if (data.status) setStatus(data.status);
+    if (data.phone_number) setPhoneNumber(data.phone_number);
+    if (data.otp_code) setOtpCode(data.otp_code);
+    if (data.full_sms_text) setFullSms(data.full_sms_text);
+    if (data.expires_at) setExpiresAt(data.expires_at);
+    if (data.error) setError(data.error);
+  }, []);
+
+  const isTerminalStatus = useCallback((s: string) => {
+    return ['code_delivered', 'completed', 'failed_no_stock', 'failed_timeout', 'refunded'].includes(s);
+  }, []);
+
+  // Verify payment with Paystack via our backend and activate the order
+  const verifyAndActivate = useCallback(async () => {
+    if (verifyAttemptedRef.current || !paystackReference) return;
+    verifyAttemptedRef.current = true;
+
+    try {
+      const res = await fetch(`/api/otp/verify-and-activate/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reference: paystackReference }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        applyUpdate(data);
+      }
+      // If 402 (payment not confirmed yet), the webhook will handle it, or polling will catch up
+    } catch (err) {
+      console.error('Verify-and-activate failed:', err);
+    }
+  }, [id, paystackReference, applyUpdate]);
+
+  // Poll the status API as a fallback
+  const pollStatus = useCallback(async () => {
+    try {
+      const localWsToken = localStorage.getItem(`otp_order_${id}`);
+      const fetchUrl = localWsToken
+        ? `/api/otp/status/${id}?wsToken=${localWsToken}`
+        : `/api/otp/status/${id}`;
+
+      const res = await fetch(fetchUrl);
+      if (!res.ok) return;
+
+      const data = await res.json();
+      applyUpdate(data);
+
+      // Stop polling if we reached a terminal state
+      if (isTerminalStatus(data.status)) {
+        if (pollIntervalRef.current) {
+          clearInterval(pollIntervalRef.current);
+          pollIntervalRef.current = null;
+        }
+      }
+    } catch (err) {
+      // Silently ignore polling errors
+    }
+  }, [id, applyUpdate, isTerminalStatus]);
 
   useEffect(() => {
     if (!id) return;
-    
+
     let socket: Socket | null = null;
 
     const initialize = async () => {
       try {
-        // Try to get token from localStorage as fallback, but rely on API first
+        // 1. Fetch initial status
         const localWsToken = localStorage.getItem(`otp_order_${id}`);
-        const fetchUrl = localWsToken ? `/api/otp/status/${id}?wsToken=${localWsToken}` : `/api/otp/status/${id}`;
-        
+        const fetchUrl = localWsToken
+          ? `/api/otp/status/${id}?wsToken=${localWsToken}`
+          : `/api/otp/status/${id}`;
+
         const res = await fetch(fetchUrl);
         const data = await res.json();
-        
+
         if (!res.ok) {
-          setError(data.error || "Failed to load order. Make sure you are logged in or using the original device.");
+          setError(data.error || 'Failed to load order.');
           return;
         }
 
-        // Update state with current data
-        if (data.status) setStatus(data.status);
-        if (data.phone_number) setPhoneNumber(data.phone_number);
-        if (data.otp_code) setOtpCode(data.otp_code);
-        if (data.full_sms_text) setFullSms(data.full_sms_text);
-        if (data.expires_at) setExpiresAt(data.expires_at);
+        applyUpdate(data);
 
+        // 2. If still pending_payment and we have a Paystack reference, verify it
+        if (data.status === 'pending_payment' && paystackReference) {
+          await verifyAndActivate();
+        }
+
+        // 3. Connect WebSocket for live updates
         const wsToken = data.wsToken || localWsToken;
-        if (!wsToken) {
-          setError("No authorization token found for real-time updates.");
-          return;
+        if (wsToken) {
+          const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL
+            ? `https://${process.env.NEXT_PUBLIC_BACKEND_URL}`
+            : 'http://localhost:5000';
+
+          socket = io(backendUrl, {
+            reconnection: true,
+            reconnectionAttempts: 10,
+            reconnectionDelay: 2000,
+          });
+          socketRef.current = socket;
+
+          socket.on('connect', () => {
+            socket?.emit('join_order', { orderId: id, wsToken });
+          });
+
+          socket.on('status_update', (updateData) => {
+            applyUpdate(updateData);
+
+            if (isTerminalStatus(updateData.status)) {
+              socket?.disconnect();
+              if (pollIntervalRef.current) {
+                clearInterval(pollIntervalRef.current);
+                pollIntervalRef.current = null;
+              }
+            }
+          });
+
+          socket.on('error', (msg) => {
+            setError(typeof msg === 'string' ? msg : 'Connection error');
+          });
+
+          socket.on('disconnect', () => {
+            // On WS disconnect, start faster polling as fallback (if not terminal)
+            if (!pollIntervalRef.current) {
+              pollIntervalRef.current = setInterval(pollStatus, 5000);
+            }
+          });
         }
 
-        // Connect to WebSocket server (server.js on port 5000)
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL 
-          ? `https://${process.env.NEXT_PUBLIC_BACKEND_URL}` 
-          : 'http://localhost:5000';
-
-        socket = io(backendUrl);
-        socketRef.current = socket;
-
-        socket.on('connect', () => {
-          socket?.emit('join_order', { orderId: id, wsToken });
-        });
-
-        socket.on('status_update', (updateData) => {
-          if (updateData.error) setError(updateData.error);
-          if (updateData.status) setStatus(updateData.status);
-          if (updateData.phone_number) setPhoneNumber(updateData.phone_number);
-          if (updateData.otp_code) setOtpCode(updateData.otp_code);
-          if (updateData.full_sms_text) setFullSms(updateData.full_sms_text);
-          if (updateData.expires_at) setExpiresAt(updateData.expires_at);
-          
-          if (['code_delivered', 'completed', 'failed_no_stock', 'failed_timeout', 'refunded'].includes(updateData.status)) {
-            socket?.disconnect(); // Terminate connection if terminal state
-          }
-        });
-
-        socket.on('error', (msg) => {
-          setError(msg);
-          // Fallback fetch is not needed here as we just did it, but could poll if desired
-        });
-        
+        // 4. Start a background poll as safety net (every 8s)
+        // This catches cases where WebSocket fails entirely
+        if (!isTerminalStatus(data.status)) {
+          pollIntervalRef.current = setInterval(pollStatus, 8000);
+        }
       } catch (err) {
-        console.error("Initialization failed", err);
-        setError("Network error loading status.");
+        console.error('Initialization failed', err);
+        setError('Network error loading status.');
       }
     };
 
@@ -88,24 +170,25 @@ export default function OtpStatusPage() {
 
     return () => {
       if (socket) socket.disconnect();
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
     };
-  }, [id]);
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // We can safely remove fetchStatusFallback as we do it on mount, 
-  // but if we want to keep it, we could reimplement it. Since WS dropped isn't crucial 
-  // to poll immediately if we already did it on mount, let's just leave it out for simplicity.
-
+  // Countdown timer
   useEffect(() => {
     if (!expiresAt) return;
-    
+
     const interval = setInterval(() => {
       const expiry = new Date(expiresAt).getTime();
-      const now = new Date().getTime();
+      const now = Date.now();
       const distance = expiry - now;
 
       if (distance < 0) {
         clearInterval(interval);
-        setTimeLeft("Expired");
+        setTimeLeft('Expired');
         return;
       }
 
@@ -117,11 +200,12 @@ export default function OtpStatusPage() {
     return () => clearInterval(interval);
   }, [expiresAt]);
 
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
+    setCopied(label);
+    setTimeout(() => setCopied(''), 2000);
   };
 
-  const isTerminal = ['code_delivered', 'completed', 'failed_no_stock', 'failed_timeout', 'refunded'].includes(status);
   const isFailed = ['failed_no_stock', 'failed_timeout', 'refunded'].includes(status);
 
   return (
@@ -136,16 +220,20 @@ export default function OtpStatusPage() {
             ) : (
               <Loader2 className="w-16 h-16 text-blue-500 animate-spin mx-auto" />
             )}
-            
+
             <h1 className="text-2xl font-bold">
-              {status === 'pending_payment' && 'Awaiting Payment...'}
-              {status === 'paid' && 'Payment Received'}
+              {status === 'pending_payment' && 'Confirming Payment...'}
+              {status === 'paid' && 'Payment Confirmed!'}
               {status === 'purchasing' && 'Buying Number...'}
               {['number_assigned', 'awaiting_sms'].includes(status) && 'Waiting for SMS'}
               {status === 'code_delivered' && 'Code Received!'}
               {isFailed && 'Order Failed'}
             </h1>
-            
+
+            {status === 'pending_payment' && (
+              <p className="text-zinc-500 text-sm">Verifying your payment with Paystack. This usually takes a few seconds...</p>
+            )}
+
             <p className="text-zinc-400 text-sm">Order ID: {id}</p>
           </div>
 
@@ -162,11 +250,11 @@ export default function OtpStatusPage() {
                 <div className="flex items-center gap-3 bg-black border border-zinc-800 rounded-lg p-4">
                   <Smartphone className="text-zinc-500" />
                   <span className="text-xl font-mono tracking-widest flex-1">{phoneNumber}</span>
-                  <button 
-                    onClick={() => copyToClipboard(phoneNumber)}
+                  <button
+                    onClick={() => copyToClipboard(phoneNumber, 'phone')}
                     className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded transition-colors text-xs font-semibold"
                   >
-                    <Copy className="w-4 h-4" />
+                    {copied === 'phone' ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
@@ -189,7 +277,15 @@ export default function OtpStatusPage() {
                   {otpCode && (
                     <div className="text-center">
                       <span className="text-xs text-green-400 uppercase font-bold tracking-wider mb-1 block">Extracted Code</span>
-                      <span className="text-4xl font-black text-white tracking-widest">{otpCode}</span>
+                      <div className="flex items-center justify-center gap-3">
+                        <span className="text-4xl font-black text-white tracking-widest">{otpCode}</span>
+                        <button
+                          onClick={() => copyToClipboard(otpCode, 'otp')}
+                          className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded transition-colors"
+                        >
+                          {copied === 'otp' ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                        </button>
+                      </div>
                     </div>
                   )}
                   <div className="bg-black/50 p-4 rounded font-mono text-sm text-zinc-300 break-words">
@@ -198,9 +294,32 @@ export default function OtpStatusPage() {
                 </div>
               </div>
             )}
+
+            {isFailed && (
+              <div className="text-center pt-2">
+                <p className="text-zinc-400 text-sm mb-4">Your payment has been automatically refunded.</p>
+                <a href="/otp" className="inline-block bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-3 rounded-lg transition-colors font-medium">
+                  Try Again
+                </a>
+              </div>
+            )}
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function OtpStatusPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-black flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-zinc-500" />
+        </div>
+      }
+    >
+      <OtpStatusContent />
+    </Suspense>
   );
 }

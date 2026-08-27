@@ -335,7 +335,7 @@ export default function AdminDashboard() {
               <button
                 onClick={() => {
                   setEditingId(null);
-                  setFormData({ platform: 'instagram', handle: '', followers: '', price: '', accountEmail: '', emailPassword: '', accountUsername: '', accountPassword: '', twoFactorAuth: '', backupCode: '', note: '', description: '' });
+                  setFormData({ platform: 'instagram', handle: '', followers: '', price: '', accountEmail: '', emailPassword: '', accountUsername: '', accountPassword: '', twoFactorAuth: '', backupCode: '', note: '', description: '', aliasOfHandle: '' });
                   setShowModal(true);
                 }}
                 className="bg-gradient-to-r from-primary to-chart-4 text-primary-foreground px-6 py-2 rounded-full hover:opacity-90 transition-all text-sm font-semibold"

@@ -196,13 +196,15 @@ function pushWsUpdate(orderId, payload) {
 
 // Background Processing Logic
 async function processOtpPurchase(orderId) {
-  const order = await OtpOrder.findById(orderId);
-  if (!order || order.status !== 'paid') return;
+  // Atomic transition: only one caller can move from 'paid' → 'purchasing'
+  const order = await OtpOrder.findOneAndUpdate(
+    { _id: orderId, status: 'paid' },
+    { $set: { status: 'purchasing' }, $push: { state_transitions: { status: 'purchasing', timestamp: new Date() } } },
+    { new: true }
+  );
+  if (!order) return; // Already processing, or not in 'paid' state
 
   try {
-    order.status = 'purchasing';
-    order.state_transitions.push({ status: 'purchasing', timestamp: new Date() });
-    await order.save();
     pushWsUpdate(orderId, { status: order.status });
 
     // 1. Check 5sim balance

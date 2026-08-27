@@ -42,7 +42,7 @@ function SuccessContent() {
     if (!details) return;
     
     const creds = details.credentials;
-    const textContent = `
+    let content = `
 --- ACCOUNT ACCESS DETAILS ---
 Platform: ${details.platform} (${details.handle})
 
