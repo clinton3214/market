@@ -18,11 +18,12 @@ export async function executeOtpPurchase(orderId: string): Promise<boolean> {
   }
 
   try {
-    // 1. Check 5sim balance
+    // 1. Check 5sim balance (balance is in USD, so compare against usd_cost not NGN cost_price)
     const balance = await getFiveSimBalance();
-    if (balance < order.cost_price) {
+    const usdCost = order.usd_cost || order.cost_price; // fallback for old orders without usd_cost
+    if (balance < usdCost) {
       order.status = 'failed_no_stock';
-      order.state_transitions.push({ status: 'failed_no_stock', timestamp: new Date(), note: 'Insufficient 5sim balance' });
+      order.state_transitions.push({ status: 'failed_no_stock', timestamp: new Date(), note: `Insufficient 5sim balance: ${balance} < ${usdCost}` });
       await order.save();
       return true; // We handled it
     }
