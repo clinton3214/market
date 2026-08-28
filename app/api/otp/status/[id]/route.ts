@@ -44,6 +44,41 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // RESILIENCE FALLBACK: 
+    // If we're waiting for an SMS, directly check the 5sim API right now.
+    // This guarantees the frontend gets the SMS even if the backend server.js crashed or missed it.
+    if (order.status === 'awaiting_sms' && order.five_sim_order_id) {
+      try {
+        const { checkOrderStatus } = await import('@/lib/fiveSim');
+        const statusResult = await checkOrderStatus(order.five_sim_order_id);
+        
+        let stateChanged = false;
+        
+        if (statusResult.sms && statusResult.sms.length > 0) {
+          const latestSms = statusResult.sms[0];
+          order.status = 'code_delivered';
+          order.otp_code = latestSms.code;
+          order.full_sms_text = latestSms.text;
+          order.state_transitions.push({ status: 'code_delivered', timestamp: new Date() });
+          stateChanged = true;
+        } else if (statusResult.status === 'CANCELED' || statusResult.status === 'TIMEOUT' || statusResult.status === 'BANNED') {
+          order.status = 'failed_timeout';
+          order.state_transitions.push({ status: 'failed_timeout', timestamp: new Date(), note: `5sim status: ${statusResult.status} (frontend check)` });
+          stateChanged = true;
+        } else if (order.expires_at && new Date() > new Date(order.expires_at)) {
+          order.status = 'failed_timeout';
+          order.state_transitions.push({ status: 'failed_timeout', timestamp: new Date(), note: '15 min timeout (frontend check)' });
+          stateChanged = true;
+        }
+
+        if (stateChanged) {
+          await order.save();
+        }
+      } catch (checkErr) {
+        console.error(`[Frontend Polling] Failed to check 5sim status for ${id}:`, checkErr);
+      }
+    }
+
     return NextResponse.json({
       status: order.status,
       phone_number: order.phone_number,
