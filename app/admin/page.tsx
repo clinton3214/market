@@ -145,6 +145,7 @@ export default function AdminDashboard() {
         description: formData.description,
         aliasOfHandle: formData.aliasOfHandle,
         status: 'available',
+        isSold: false,
         verified: true,
         credentials: {
           accountEmail: formData.accountEmail,
