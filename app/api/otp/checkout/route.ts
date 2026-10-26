@@ -14,6 +14,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
+    const cleanService = service.toLowerCase().replace(/\s+/g, '');
+    if (cleanService === 'whatsapp' || cleanService.includes('whatsapp')) {
+      return NextResponse.json({
+        error: "WhatsApp numbers are currently unavailable. Rentals are temporarily paused to protect against failed verification codes.",
+        unavailable: true,
+        code: "WHATSAPP_UNAVAILABLE",
+        platform: "WhatsApp"
+      }, { status: 400 });
+    }
+
     // 1. Fetch live price from 5sim
     const cost_price = await getLivePrice(country, service);
     

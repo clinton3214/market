@@ -184,6 +184,28 @@ export function AccountMarketplace() {
             <AccountCard key={account.id} account={account} />
           ))}
         </div>
+      ) : query.toLowerCase().replace(/\s+/g, '').includes('whatsapp') ? (
+        <div className="mt-12 overflow-hidden rounded-3xl border border-amber-500/30 bg-[#120f18]/85 p-6 sm:p-8 text-left shadow-[0_20px_60px_-15px_rgba(245,158,11,0.25),inset_0_1.5px_1px_rgba(255,255,255,0.25)] backdrop-blur-2xl">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase text-amber-300 bg-amber-500/15 border border-amber-400/35">
+              <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+              WhatsApp Notice
+            </span>
+          </div>
+          <h3 className="text-xl font-bold text-white">Looking for WhatsApp Numbers or Accounts?</h3>
+          <p className="mt-2 text-sm text-zinc-300 max-w-2xl leading-relaxed">
+            WhatsApp numbers are currently unavailable across all carrier routes due to stricter anti-VoIP filtering. To prevent failed activations and account bans, rentals are temporarily paused.
+          </p>
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <a
+              href="/otp"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-xs sm:text-sm text-white bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 border border-white/20 shadow-[0_4px_15px_rgba(14,165,233,0.3)] transition-all hover:scale-[1.02]"
+            >
+              <span>Explore Active Virtual Numbers (Telegram, Signal)</span>
+              <span>→</span>
+            </a>
+          </div>
+        </div>
       ) : (
         <div className="mt-16 rounded-3xl border border-white/10 bg-white/[0.04] p-10 text-center backdrop-blur-md">
           <p className="text-muted-foreground">No accounts match your search.</p>

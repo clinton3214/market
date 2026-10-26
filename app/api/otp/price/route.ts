@@ -12,6 +12,16 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Missing country or service parameters" }, { status: 400 });
     }
 
+    const cleanService = service.toLowerCase().replace(/\s+/g, '');
+    if (cleanService === 'whatsapp' || cleanService.includes('whatsapp')) {
+      return NextResponse.json({
+        error: "WhatsApp numbers are currently unavailable due to carrier-level verification restrictions. Orders are temporarily paused to protect your funds.",
+        unavailable: true,
+        code: "WHATSAPP_UNAVAILABLE",
+        platform: "WhatsApp"
+      }, { status: 400 });
+    }
+
     const cost_price = await getLivePrice(country, service);
 
     if (cost_price === null) {
