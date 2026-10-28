@@ -78,8 +78,23 @@ const OtpOrderSchema = new mongoose.Schema({
   full_sms_text: {
     type: String,
   },
+  provider: {
+    type: String,
+    enum: ['5sim', 'smspool'],
+    default: '5sim',
+  },
   five_sim_order_id: {
     type: Number,
+  },
+  smspool_order_id: {
+    type: String,
+  },
+  pool_or_operator: {
+    type: String,
+  },
+  attempt_count: {
+    type: Number,
+    default: 1,
   },
   paystack_reference: {
     type: String,

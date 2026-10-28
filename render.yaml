@@ -11,6 +11,10 @@ services:
         value: 5000
       - key: PAYSTACK_SECRET_KEY
         sync: false
+      - key: SMSPOOL_API_KEY
+        sync: false
+      - key: FIVESIM_API_KEY
+        sync: false
 
   # Frontend Next.js Server
   - type: web
@@ -20,6 +24,10 @@ services:
     buildCommand: pnpm install --no-frozen-lockfile && pnpm run build
     startCommand: pnpm run start
     envVars:
+      - key: SMSPOOL_API_KEY
+        sync: false
+      - key: FIVESIM_API_KEY
+        sync: false
       - key: NEXT_PUBLIC_BACKEND_URL
         fromService:
           type: web

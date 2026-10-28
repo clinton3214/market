@@ -1,6 +1,7 @@
+// lib/otpLogic.ts
 import dbConnect from '@/lib/mongodb';
 import OtpOrder from '@/models/OtpOrder';
-import { getFiveSimBalance, buyNumber } from '@/lib/fiveSim';
+import { executeOrderWithAutoRetry } from '@/lib/autoRetryEngine';
 
 export async function executeOtpPurchase(orderId: string): Promise<boolean> {
   await dbConnect();
@@ -18,39 +19,23 @@ export async function executeOtpPurchase(orderId: string): Promise<boolean> {
   }
 
   try {
-    // 1. Check 5sim balance (balance is in USD, so compare against usd_cost not NGN cost_price)
-    const balance = await getFiveSimBalance();
-    const usdCost = order.usd_cost || order.cost_price; // fallback for old orders without usd_cost
-    if (balance < usdCost) {
-      order.status = 'failed_no_stock';
-      order.state_transitions.push({ status: 'failed_no_stock', timestamp: new Date(), note: `Insufficient 5sim balance: ${balance} < ${usdCost}` });
-      await order.save();
-      return true; // We handled it
-    }
-
-    // 2. Buy from 5sim
-    const buyResult = await buyNumber(order.country, order.service);
-
-    // 3. Success -> Update order
-    order.status = 'awaiting_sms';
-    order.five_sim_order_id = buyResult.id;
-    order.phone_number = buyResult.phone;
-    order.expires_at = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
-    order.state_transitions.push({ status: 'awaiting_sms', timestamp: new Date() });
-    await order.save();
-    
-    return true;
+    // Run full auto-retry engine (up to 3 provider/pool attempts with auto-refund)
+    return await executeOrderWithAutoRetry(orderId);
   } catch (error: any) {
-    console.error(`Error processing OTP order ${orderId} in frontend logic:`, error);
+    console.error(`Error processing OTP order ${orderId} in auto-retry logic:`, error);
     try {
       const failedOrder = await OtpOrder.findById(orderId);
       if (failedOrder && failedOrder.status === 'purchasing') {
         failedOrder.status = 'failed_no_stock';
-        failedOrder.state_transitions.push({ status: 'failed_no_stock', timestamp: new Date(), note: `System error: ${error.message}` });
+        failedOrder.state_transitions.push({
+          status: 'failed_no_stock',
+          timestamp: new Date(),
+          note: `System error: ${error.message}`,
+        });
         await failedOrder.save();
       }
     } catch (dbError) {
-      console.error('Failed to mark order as failed after 5sim error', dbError);
+      console.error('Failed to mark order as failed after error', dbError);
     }
     return true;
   }

@@ -104,10 +104,7 @@ function Selector({
                     >
                       <span>{item}</span>
                       {isWhatsApp && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                          <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-                          Paused
-                        </span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 ring-2 ring-white/10 shadow-[0_0_10px_rgba(234,179,8,0.5)]"></span>
                       )}
                     </button>
                   )
@@ -124,10 +121,7 @@ function Selector({
                 >
                   <span>{item}</span>
                   {isWhatsApp && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                      <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-                      Paused
-                    </span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-500 ring-2 ring-white/10 shadow-[0_0_10px_rgba(234,179,8,0.5)]"></span>
                   )}
                 </button>
               )
@@ -295,7 +289,7 @@ export default function OtpPurchasePage() {
               {isWhatsApp ? (
                 <span className="flex items-center gap-2 text-amber-300">
                   <span className="status-dot" style={{ backgroundColor: '#f59e0b', boxShadow: '0 0 10px #f59e0b' }} />
-                  <span>WhatsApp route paused — select Telegram or another platform</span>
+                  <span>WhatsApp is currently unavailable — select Telegram or another platform</span>
                 </span>
               ) : country && service ? (
                 <>
@@ -324,7 +318,7 @@ export default function OtpPurchasePage() {
                   }}
                 >
                   <AlertTriangle className="w-4 h-4 text-amber-200 animate-pulse" />
-                  <span>Route Paused • View Notice</span>
+                  <span>Route Offline • View Notice</span>
                 </button>
               ) : (
                 <button 

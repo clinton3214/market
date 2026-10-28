@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import OtpOrder from '@/models/OtpOrder';
-import { getLivePrice } from '@/lib/fiveSim';
+import { getUnifiedLivePrice } from '@/lib/unifiedPricing';
 import { getExchangeRate } from '@/lib/exchangeRate';
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY || '';
@@ -24,12 +24,14 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
 
-    // 1. Fetch live price from 5sim
-    const cost_price = await getLivePrice(country, service);
+    // 1. Fetch live price from best provider/pool
+    const priceResult = await getUnifiedLivePrice(country, service);
     
-    if (cost_price === null) {
-      return NextResponse.json({ error: "Out of stock on 5sim" }, { status: 404 });
+    if (!priceResult || priceResult.cost_price_usd === null) {
+      return NextResponse.json({ error: "Out of stock across providers" }, { status: 404 });
     }
+
+    const cost_price = priceResult.cost_price_usd;
 
     // 2. Compute markup with live exchange rate
     let exchangeRate: number;
@@ -51,6 +53,8 @@ export async function POST(request: Request) {
       customer_email: email,
       country,
       service,
+      provider: priceResult.provider,
+      pool_or_operator: priceResult.pool_or_operator,
       cost_price: cost_price_ngn, // NGN cost
       usd_cost: cost_price,       // USD cost
       exchange_rate_used: exchangeRate,

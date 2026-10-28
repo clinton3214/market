@@ -7,10 +7,41 @@ import crypto from 'crypto';
 const FIVESIM_API_KEY = process.env.FIVESIM_API_KEY || '';
 const FIVESIM_BASE_URL = 'https://5sim.net/v1';
 
+const SMSPOOL_API_KEY = process.env.SMSPOOL_API_KEY || '11LrpV8nk3xUPBlflnykrEbytST8snuG';
+const SMSPOOL_BASE_URL = 'https://api.smspool.net';
+
 const getHeaders = () => ({
   'Authorization': `Bearer ${FIVESIM_API_KEY}`,
   'Accept': 'application/json',
 });
+
+const getSmsPoolHeaders = () => ({
+  'Authorization': `Bearer ${SMSPOOL_API_KEY}`,
+  'Content-Type': 'application/x-www-form-urlencoded',
+  'Accept': 'application/json',
+});
+
+async function checkSmsPoolStatus(orderId) {
+  const form = new URLSearchParams({ orderid: orderId });
+  const response = await fetch(`${SMSPOOL_BASE_URL}/sms/check`, {
+    method: 'POST',
+    headers: getSmsPoolHeaders(),
+    body: form.toString()
+  });
+  if (!response.ok) throw new Error(`Failed to check SMSPool order: ${response.statusText}`);
+  return await response.json();
+}
+
+async function cancelSmsPoolOrder(orderId) {
+  const form = new URLSearchParams({ orderid: orderId });
+  const response = await fetch(`${SMSPOOL_BASE_URL}/sms/cancel`, {
+    method: 'POST',
+    headers: getSmsPoolHeaders(),
+    body: form.toString()
+  });
+  if (!response.ok) return null;
+  return await response.json();
+}
 
 const allowedOrigins = [
   'https://travispays.com',
@@ -140,15 +171,16 @@ const server = http.createServer((req, res) => {
         // Detached async execution
         // Check if the frontend already did the 5sim purchase
         const freshOrder = await OtpOrder.findById(orderId);
-        if (freshOrder && freshOrder.status === 'awaiting_sms' && freshOrder.five_sim_order_id) {
-          // Frontend already bought the number, just start polling for SMS
-          console.log(`[server.js] Order ${orderId} already in awaiting_sms, starting poll loop`);
+        if (freshOrder && freshOrder.status === 'awaiting_sms') {
+          const provider = freshOrder.provider || (freshOrder.smspool_order_id ? 'smspool' : '5sim');
+          const providerId = freshOrder.smspool_order_id || freshOrder.five_sim_order_id;
+          console.log(`[server.js] Order ${orderId} in awaiting_sms (${provider}), starting poll loop`);
           pushWsUpdate(orderId, { 
             status: freshOrder.status, 
             phone_number: freshOrder.phone_number,
             expires_at: freshOrder.expires_at 
           });
-          startPollingLoop(orderId, freshOrder.five_sim_order_id, freshOrder.expires_at);
+          startPollingLoop(orderId, providerId, freshOrder.expires_at, provider);
         } else {
           // Fallback: do the full purchase (in case frontend didn't handle it)
           processOtpPurchase(orderId).catch(console.error);
@@ -276,10 +308,60 @@ async function processOtpPurchase(orderId) {
   }
 }
 
-function startPollingLoop(orderId, fiveSimOrderId, expiresAt) {
+function startPollingLoop(orderId, providerOrderId, expiresAt, provider = '5sim') {
   setTimeout(() => {
-    pollFiveSim(orderId, fiveSimOrderId, new Date(expiresAt));
+    if (provider === 'smspool') {
+      pollSmsPool(orderId, String(providerOrderId), new Date(expiresAt));
+    } else {
+      pollFiveSim(orderId, providerOrderId, new Date(expiresAt));
+    }
   }, 3000);
+}
+
+async function pollSmsPool(orderId, smsPoolOrderId, expiresAt, attempt = 1) {
+  try {
+    const order = await OtpOrder.findById(orderId);
+    if (!order || !['awaiting_sms', 'number_assigned', 'purchasing'].includes(order.status)) return;
+
+    if (new Date() > expiresAt) {
+      await cancelSmsPoolOrder(smsPoolOrderId);
+      order.status = 'failed_timeout';
+      order.state_transitions.push({ status: 'failed_timeout', timestamp: new Date(), note: 'SMSPool timeout reached' });
+      await order.save();
+      pushWsUpdate(orderId, { status: order.status, error: "Timeout reached. Order cancelled." });
+      return;
+    }
+
+    const checkRes = await checkSmsPoolStatus(smsPoolOrderId);
+    if (checkRes.status === 3 && checkRes.sms) {
+      order.status = 'code_delivered';
+      order.otp_code = checkRes.sms;
+      order.full_sms_text = checkRes.full_sms || `SMS code: ${checkRes.sms}`;
+      order.state_transitions.push({ status: 'code_delivered', timestamp: new Date() });
+      await order.save();
+
+      pushWsUpdate(orderId, { 
+        status: order.status, 
+        otp_code: order.otp_code, 
+        full_sms_text: order.full_sms_text 
+      });
+      return; 
+    }
+
+    if (checkRes.status === 6) {
+      order.status = 'failed_timeout';
+      order.state_transitions.push({ status: 'failed_timeout', timestamp: new Date(), note: 'SMSPool order refunded' });
+      await order.save();
+      pushWsUpdate(orderId, { status: order.status, error: "Order was refunded by provider." });
+      return;
+    }
+
+    const delay = Math.min(3000 + (attempt * 1000), 10000);
+    setTimeout(() => pollSmsPool(orderId, smsPoolOrderId, expiresAt, attempt + 1), delay);
+  } catch (error) {
+    console.error(`SMSPool polling error for order ${orderId}:`, error);
+    setTimeout(() => pollSmsPool(orderId, smsPoolOrderId, expiresAt, attempt), 5000);
+  }
 }
 
 async function pollFiveSim(orderId, fiveSimOrderId, expiresAt, attempt = 1) {
@@ -366,9 +448,11 @@ async function resumeInFlightOrders() {
         order.status = 'failed_no_stock';
         order.state_transitions.push({ status: 'failed_no_stock', timestamp: new Date(), note: 'Crashed during purchasing phase' });
         await order.save();
-      } else if (order.five_sim_order_id && order.expires_at) {
-        // Resume polling
-        startPollingLoop(order._id, order.five_sim_order_id, order.expires_at);
+      } else if (order.expires_at && (order.five_sim_order_id || order.smspool_order_id)) {
+        // Resume polling for either 5sim or SMSPool
+        const provider = order.provider || (order.smspool_order_id ? 'smspool' : '5sim');
+        const providerId = order.smspool_order_id || order.five_sim_order_id;
+        startPollingLoop(order._id, providerId, order.expires_at, provider);
       }
     }
   } catch (err) {

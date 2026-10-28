@@ -71,7 +71,7 @@ export function WhatsAppLiquidWarning({
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
             </span>
-            Route Offline • WhatsApp Paused
+            Route Offline • WhatsApp Unavailable
           </span>
 
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-medium text-emerald-300/90 bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-md">

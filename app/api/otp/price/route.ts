@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getLivePrice } from '@/lib/fiveSim';
+import { getUnifiedLivePrice } from '@/lib/unifiedPricing';
 import { getExchangeRate } from '@/lib/exchangeRate';
 
 export async function GET(request: Request) {
@@ -22,11 +22,13 @@ export async function GET(request: Request) {
       }, { status: 400 });
     }
 
-    const cost_price = await getLivePrice(country, service);
+    const priceResult = await getUnifiedLivePrice(country, service);
 
-    if (cost_price === null) {
-      return NextResponse.json({ error: "Out of stock on 5sim" }, { status: 404 });
+    if (!priceResult || priceResult.cost_price_usd === null) {
+      return NextResponse.json({ error: "Out of stock across available providers" }, { status: 404 });
     }
+
+    const cost_price = priceResult.cost_price_usd;
 
     let exchangeRate: number;
     try {
